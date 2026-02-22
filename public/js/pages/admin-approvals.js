@@ -158,7 +158,7 @@
     // Approve saree
     window.approveSaree = async function (sareeId) {
         try {
-            await api.put(`/ api / admin / sarees / ${sareeId}/approve`);
+            await api.put(`/api/admin/sarees/${sareeId}/approve`);
             notifications.showToast('success', 'Success', 'Saree approved successfully');
             await loadPendingApprovals();
             selectedSarees.delete(sareeId);

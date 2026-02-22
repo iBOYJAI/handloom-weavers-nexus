@@ -139,10 +139,11 @@ const api = {
         // Remove Content-Type header to let browser set it with boundary
         delete mergedOptions.headers?.['Content-Type'];
 
+        const method = (mergedOptions.method || 'POST').toUpperCase();
         try {
             const response = await fetch(`${API_BASE_URL}${url}`, {
                 ...mergedOptions,
-                method: 'POST',
+                method,
                 body: formData,
                 // ALWAYS include credentials - critical for session cookies
                 credentials: 'include',

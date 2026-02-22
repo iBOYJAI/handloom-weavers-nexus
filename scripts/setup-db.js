@@ -6,7 +6,7 @@ require('dotenv').config();
 
 async function setupDatabase() {
     let connection;
-    
+
     try {
         // Connect to MySQL server (without database)
         // Handle placeholder password - if still "your_mysql_password", treat as empty
@@ -15,7 +15,7 @@ async function setupDatabase() {
             dbPassword = '';
             console.log('⚠️  Using empty password (placeholder detected)');
         }
-        
+
         connection = await mysql.createConnection({
             host: process.env.DB_HOST || 'localhost',
             user: process.env.DB_USER || 'root',
@@ -33,14 +33,14 @@ async function setupDatabase() {
         await connection.query(`USE \`${dbName}\``);
 
         // Read and execute schema file using exec
-        const schemaPath = path.join(__dirname, 'database', 'schema.sql');
+        const schemaPath = path.join(__dirname, '..', 'database', 'schema.sql');
         const { exec } = require('child_process');
         const { promisify } = require('util');
         const execAsync = promisify(exec);
 
         // Use mysql command line to execute the schema file properly
         const passwordArg = dbPassword ? `-p${dbPassword}` : '';
-        
+
         try {
             // Try using mysql command line first
             const mysqlCmd = `mysql -u ${process.env.DB_USER || 'root'} ${passwordArg} ${dbName} < "${schemaPath}"`;
@@ -49,21 +49,21 @@ async function setupDatabase() {
         } catch (cmdError) {
             // Fallback: Execute SQL statements manually
             console.log('⚠️  mysql command not available, executing statements manually...');
-            
+
             let schema = fs.readFileSync(schemaPath, 'utf8');
-            
+
             // Remove comments
             schema = schema.replace(/--[^\r\n]*/g, ''); // Remove single-line comments
             schema = schema.replace(/\/\*[\s\S]*?\*\//g, ''); // Remove multi-line comments
-            
+
             // Split by semicolons
             const statements = schema
                 .split(';')
                 .map(s => s.trim().replace(/\n\s*\n/g, '\n')) // Clean up extra newlines
                 .filter(s => {
                     const trimmed = s.trim();
-                    return trimmed.length > 10 && 
-                           !trimmed.match(/^(CREATE DATABASE|USE)/i); // Skip DB creation/use
+                    return trimmed.length > 10 &&
+                        !trimmed.match(/^(CREATE DATABASE|USE)/i); // Skip DB creation/use
                 });
 
             console.log(`📝 Executing ${statements.length} SQL statements...`);
@@ -75,7 +75,7 @@ async function setupDatabase() {
                         await connection.query(statement);
                     } catch (err) {
                         // Ignore "already exists" and "Duplicate" errors
-                        if (!err.message.includes('already exists') && 
+                        if (!err.message.includes('already exists') &&
                             !err.message.includes('Duplicate') &&
                             !err.message.includes('Duplicate entry') &&
                             !err.message.includes('Unknown database')) {
@@ -88,9 +88,11 @@ async function setupDatabase() {
 
         console.log('✅ Database schema created successfully');
         console.log('✅ Seed data inserted');
-        console.log('\n📝 Default Admin Credentials:');
-        console.log('   Email: admin@nexus.com');
-        console.log('   Password: Admin@123');
+        console.log('\n📝 Demo users (see database/seed-users.sql for names):');
+        console.log('   Admin: admin@nexus.com / Admin@123');
+        console.log('   Buyers: buyer1@demo.com, buyer2@demo.com, buyer3@demo.com / Demo@123');
+        console.log('   Weavers: weaver1@demo.com, weaver2@demo.com, weaver3@demo.com / Demo@123');
+        console.log('   To set display names: mysql -u root -p handloom_nexus < database/seed-users.sql');
         console.log('\n🎉 Database setup complete!');
 
     } catch (error) {

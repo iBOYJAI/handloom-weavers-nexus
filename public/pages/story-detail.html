@@ -79,6 +79,7 @@
             line-height: 1.1;
             margin-bottom: 2rem;
             letter-spacing: -2px;
+            color: var(--color-primary);
         }
 
         .story-media-container {
@@ -165,7 +166,7 @@
                     <div class="story-hero-bg" id="hero-bg"></div>
                     <div class="story-hero-overlay"></div>
                     <div class="story-main-content">
-                        <span class="artisan-badge">Heritage Artisan</span>
+                        <span class="artisan-badge" id="weaver-name-badge">Heritage Artisan</span>
                         <h1 class="story-title" id="story-title"></h1>
                         <p id="story-caption"
                             style="font-size: 1.5rem; opacity: 0.9; font-family: var(--font-heading); font-style: italic;">
@@ -204,10 +205,10 @@
 
     <script src="/js/api.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/components.js"></script>
     <script src="/js/notifications.js"></script>
+    <script src="/js/components.js"></script>
     <script>
-        async function loadStory() {
+        async function initPage() {
             const params = new URLSearchParams(window.location.search);
             const storyId = params.get('id');
             const isPreview = params.get('preview') === 'true';
@@ -233,8 +234,9 @@
                 document.getElementById('story-caption').textContent = story.caption;
                 document.getElementById('story-description').innerHTML = (story.description || story.caption).replace(/\n/g, '<br>');
                 document.getElementById('artisan-location').textContent = story.weaver_region || 'Traditional Cluster';
+                document.getElementById('weaver-name-badge').textContent = story.weaver_name || 'Heritage Artisan';
 
-                const mediaPath = '/' + story.media_path.replace(/^\/+/, '');
+                const mediaPath = '/' + (story.media_path || '').replace(/^\/+/, '').replace(/^https?:\/\/[^/]+/, '');
                 const isVideo = story.media_type === 'video';
 
                 const heroBg = document.getElementById('hero-bg');
@@ -258,7 +260,7 @@
 
                         // Skip the first one if it's already shown as main
                         paths.slice(1).forEach((path, idx) => {
-                            const p = '/' + path.replace(/^\/+/, '');
+                            const p = '/' + (path || '').replace(/^\/+/, '').replace(/^https?:\/\/[^/]+/, '');
                             const t = types[idx + 1];
                             const item = document.createElement('div');
                             item.style.borderRadius = '16px';
@@ -296,7 +298,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadStory);
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 

@@ -1,8 +1,11 @@
 # MASTER PROJECT REPORT
 ## Handloom Weavers Nexus: A Scalable D2C Marketplace for Artisan Preservation
 
-**Student:** Selvanayaki G  
-**Roll No:** 23AI122  
+**Freelancing Project By: iBOY Innovation HUB**  
+**Developed by:** Jaiganesh D. (iBOY)
+
+**Academic Submission:**  
+**Student:** Selvanayaki G | **Roll No:** 23AI122  
 **Guide:** Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.  
 **Institution:** Gobi Arts & Science College, Gobichettipalayam  
 
@@ -57,6 +60,8 @@
 The successful completion of this project, **"Handloom Weavers Nexus"**, is the result of collective effort, guidance, and inspiration from many quarters. It is with a deep sense of gratitude that I acknowledge the individuals and organizations who have contributed to the fruition of this project.
 
 First and foremost, I would like to express my sincere gratitude to my project guide **Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.**, for his constant support, technical guidance, and encouragement throughout the development of this project. I also thank the faculty and management of **Gobi Arts & Science College, Gobichettipalayam**, for providing the resources and environment necessary for this work.
+
+
 
 I am profoundly grateful to the weaving community of India. Their unparalleled craftsmanship, patience, and cultural resilience serve as the core inspiration for this platform. This project is, in every sense, a tribute to their legacy, and I am honored to have had the opportunity to build a bridge that connects their ancient art with the digital modern world.
 
@@ -546,7 +551,8 @@ function injectSidebar() {
 
 ---
 <div align="center">
-  <p><b>Developed by Selvanayaki G</b></p>
-  <p>Roll No: 23AI122 | Guide: Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.</p>
-  <p>Gobi Arts & Science College, Gobichettipalayam</p>
+  <p><b>Project By: iBOY Innovation HUB</b></p>
+  <p><b>Developed by Jaiganesh D. (iBOY)</b></p>
+  <p><i>Innovation isn't just what you do — it's who YOU are.</i></p>
+  <hr>
 </div>

@@ -127,6 +127,45 @@
 
         document.getElementById('recent-orders').innerHTML = ordersHtml;
 
+        // Render Approval Waitlist
+        if (data.waitlist && (data.waitlist.sarees.length > 0 || data.waitlist.stories.length > 0)) {
+            const waitlistSection = document.getElementById('waitlist-section');
+            const sareesGrid = document.getElementById('waitlist-sarees');
+            const storiesGrid = document.getElementById('waitlist-stories');
+
+            waitlistSection.style.display = 'block';
+
+            if (data.waitlist.sarees.length > 0) {
+                sareesGrid.innerHTML = data.waitlist.sarees.map(s => `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--color-surface); border-radius: 12px; margin-bottom: 0.75rem;">
+                        <img src="${s.primary_image || '/assets/images/defaults/saree-placeholder.svg'}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;">
+                        <div style="flex: 1;">
+                            <h5 style="margin: 0; font-size: 0.9rem;">${s.title}</h5>
+                            <p style="margin: 0; font-size: 0.75rem; color: #999;">₹${s.price.toLocaleString()}</p>
+                        </div>
+                        <span style="font-size: 0.7rem; color: var(--color-accent); font-weight: 600; text-transform: uppercase;">Awaiting</span>
+                    </div>
+                `).join('');
+            } else {
+                sareesGrid.innerHTML = '<p style="font-size: 0.8rem; color: #999; margin: 0;">No sarees pending.</p>';
+            }
+
+            if (data.waitlist.stories.length > 0) {
+                storiesGrid.innerHTML = data.waitlist.stories.map(s => `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: var(--color-surface); border-radius: 12px; margin-bottom: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 50%;">📽️</div>
+                        <div style="flex: 1;">
+                            <h5 style="margin: 0; font-size: 0.9rem;">${s.title}</h5>
+                            <p style="margin: 0; font-size: 0.75rem; color: #999;">${new Date(s.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <span style="font-size: 0.7rem; color: var(--color-accent); font-weight: 600; text-transform: uppercase;">Awaiting</span>
+                    </div>
+                `).join('');
+            } else {
+                storiesGrid.innerHTML = '<p style="font-size: 0.8rem; color: #999; margin: 0;">No stories pending.</p>';
+            }
+        }
+
     } catch (error) {
         if (error.message && error.message.includes('pending admin approval')) {
             window.location.href = '/pages/weaver-pending.html';

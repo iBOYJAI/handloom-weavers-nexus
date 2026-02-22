@@ -11,8 +11,7 @@ const components = {
         }
     },
 
-    // Inject header
-    // Inject header
+    // Inject header (loadHeader is an alias for pages that call it)
     async injectHeader() {
         const placeholder = document.getElementById('header-placeholder');
         if (!placeholder) return;
@@ -161,7 +160,7 @@ const components = {
                         if (suggestions.length > 0) {
                             suggestionsDiv.innerHTML = suggestions.map(s => `
                                 <div class="suggestion-item" style="padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid #f9f9f9;" onclick="window.location.href='/pages/saree-detail.html?id=${s.id}'" onmouseover="this.style.background='#fcfcfc'" onmouseout="this.style.background='white'">
-                                    <img src="${s.primary_image ? '/' + s.primary_image : '/assets/images/defaults/saree-placeholder.svg'}" style="width: 32px; height: 40px; border-radius: 4px; object-fit: cover;">
+                                    <img src="${s.primary_image ? (s.primary_image.startsWith('/') ? s.primary_image : '/' + s.primary_image.replace(/^\/+/, '')) : '/assets/images/defaults/saree-placeholder.svg'}" style="width: 32px; height: 40px; border-radius: 4px; object-fit: cover;">
                                     <div>
                                         <div style="font-size: 0.9rem; font-weight: 600; color: var(--color-dark);">${s.title}</div>
                                         <div style="font-size: 0.75rem; color: #999;">₹${s.price} · By ${s.weaver_name}</div>
@@ -274,10 +273,13 @@ const components = {
                 <nav class="sidebar-menu">
                     ${sidebarItems.map(item => {
             const isActive = currentPath.includes(item.href);
-            const iconUrl = this.getIconUrl(item.icon);
+            const isHeart = item.icon === 'heart';
+            const iconPart = isHeart
+                ? `<span class="sidebar-item-icon" style="font-size:1.1rem;line-height:1;">❤</span>`
+                : `<img src="${this.getIconUrl(item.icon)}" class="sidebar-item-icon" style="width: 20px; height: 20px; ${isActive ? 'filter: brightness(0) invert(1);' : ''}" alt="">`;
             return `
                             <a href="${item.href}" class="sidebar-item ${isActive ? 'active' : ''}">
-                                <img src="${iconUrl}" class="sidebar-item-icon" style="width: 20px; height: 20px; ${isActive ? 'filter: brightness(0) invert(1);' : ''}">
+                                ${iconPart}
                                 <span class="sidebar-item-text">${item.text}</span>
                             </a>
                         `;
@@ -314,7 +316,7 @@ const components = {
             list: 'ni-list',
             folder: 'ni-folder',
             'square-poll': 'ni-square-poll',
-            heart: 'ni-butterfly',
+            heart: 'heart',
         };
         const fileName = icons[iconName] || 'ni-file';
         return `/assets/icons/Notion-Icons/Regular/svg/${fileName}.svg`;
@@ -461,6 +463,11 @@ const components = {
         `;
 
         placeholder.innerHTML = footerHTML;
+    },
+
+    // Alias for pages that call loadHeader (e.g. story-detail)
+    async loadHeader() {
+        return this.injectHeader();
     },
 
     // Initialize all components

@@ -20,5 +20,9 @@ router.delete('/cart/:id', requireAuth, canAccessBuyerFeatures, BuyerController.
 router.post('/orders', requireAuth, canAccessBuyerFeatures, BuyerController.createOrder);
 router.get('/orders', requireAuth, canAccessBuyerFeatures, BuyerController.getOrders);
 
+// Wishlist routes
+router.post('/wishlist/toggle', requireAuth, canAccessBuyerFeatures, BuyerController.toggleWishlist);
+router.get('/wishlist', requireAuth, canAccessBuyerFeatures, BuyerController.getWishlist);
+
 module.exports = router;
 

@@ -24,6 +24,14 @@ const WeaverController = {
             // Get sarees count
             const sarees = await SareeModel.getByWeaver(weaverId);
             const totalSarees = sarees.length;
+            const pendingSarees = sarees.filter(s => !s.is_approved).slice(0, 5);
+
+            // Get stories
+            const [stories] = await pool.execute(
+                'SELECT * FROM weaver_stories WHERE weaver_id = ? ORDER BY created_at DESC',
+                [weaverId]
+            );
+            const pendingStories = stories.filter(s => !s.is_approved).slice(0, 5);
 
             // Get orders stats
             const stats = await OrderModel.getWeaverStats(weaverId);
@@ -38,7 +46,11 @@ const WeaverController = {
                     totalOrders: stats.total_orders || 0,
                     totalEarnings: parseFloat(stats.total_earnings || 0),
                     pendingOrders: stats.pending_orders || 0,
-                    recentOrders
+                    recentOrders,
+                    waitlist: {
+                        sarees: pendingSarees,
+                        stories: pendingStories
+                    }
                 }
             });
         } catch (error) {
@@ -65,10 +77,15 @@ const WeaverController = {
             }
 
             const images = await SareeModel.getImages(sareeId);
-            const normalizedImages = images.map(img => ({
-                ...img,
-                file_path: img.file_path.replace(/\\/g, '/')
-            }));
+            const normalizedImages = images.map(img => {
+                if (img.file_path) {
+                    img.file_path = img.file_path.replace(/\\/g, '/');
+                    if (!img.file_path.startsWith('/')) {
+                        img.file_path = '/' + img.file_path;
+                    }
+                }
+                return img;
+            });
 
             res.json({
                 success: true,
@@ -611,10 +628,15 @@ const WeaverController = {
                 [weaverId]
             );
 
-            const normalizedRows = rows.map(row => ({
-                ...row,
-                media_path: row.media_path ? row.media_path.replace(/\\/g, '/') : null
-            }));
+            const normalizedRows = rows.map(row => {
+                if (row.media_path) {
+                    row.media_path = row.media_path.replace(/\\/g, '/');
+                    if (!row.media_path.startsWith('/') && !row.media_path.startsWith('http')) {
+                        row.media_path = '/' + row.media_path;
+                    }
+                }
+                return row;
+            });
 
             res.json({
                 success: true,

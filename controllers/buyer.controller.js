@@ -4,11 +4,19 @@ const OfferModel = require('../models/offer.model');
 const VariantModel = require('../models/variant.model');
 const UserModel = require('../models/user.model');
 const NotificationModel = require('../models/notification.model');
+const WishlistModel = require('../models/wishlist.model');
 const pool = require('../config/db');
 const BuyerController = {
     // Get all sarees with filters (only approved)
     async getSarees(req, res) {
         try {
+            // TEMPORARY DIAGNOSTIC: which DB and how many approved sarees
+            const [dbCheck] = await pool.execute(
+                'SELECT DATABASE() as db, COUNT(*) as cnt FROM sarees WHERE is_active = 1 AND is_approved = 1'
+            );
+            console.log('🔍 DB CHECK:', dbCheck[0]);
+            // END DIAGNOSTIC
+
             const filters = {
                 categoryId: req.query.category ? parseInt(req.query.category) : null,
                 minPrice: req.query.minPrice ? parseFloat(req.query.minPrice) : null,
@@ -20,65 +28,15 @@ const BuyerController = {
                 approvedOnly: true // Only show approved sarees to buyers
             };
 
-            // NOTE: Using a direct query here because SareeModel.findAll was returning
-            // an empty result despite valid data in the database. This mirrors the
-            // model logic but guarantees correct data for the buyer home page.
-            let query = `SELECT s.*, 
-                                u.name AS weaver_name, 
-                                u.region AS weaver_region,
-                                c.name AS category_name, 
-                                c.slug AS category_slug,
-                                (SELECT file_path FROM saree_images 
-                                 WHERE saree_id = s.id AND is_primary = TRUE 
-                                 LIMIT 1) AS primary_image
-                         FROM sarees s
-                         LEFT JOIN users u ON s.weaver_id = u.id
-                         LEFT JOIN saree_categories c ON s.category_id = c.id
-                         WHERE s.is_active = TRUE
-                         AND s.is_approved = TRUE`;
+            const sarees = await SareeModel.findAll(filters);
 
-            const values = [];
-
-            if (filters.categoryId) {
-                query += ' AND s.category_id = ?';
-                values.push(filters.categoryId);
+            // Get active offers and apply to prices (optional; don't fail sarees if offers error)
+            let activeOffers = [];
+            try {
+                activeOffers = await OfferModel.getActiveOffers();
+            } catch (offerErr) {
+                console.warn('getSarees: offers failed, continuing without', offerErr.message);
             }
-            if (filters.minPrice) {
-                query += ' AND s.price >= ?';
-                values.push(filters.minPrice);
-            }
-            if (filters.maxPrice) {
-                query += ' AND s.price <= ?';
-                values.push(filters.maxPrice);
-            }
-            if (filters.region) {
-                query += ' AND u.region = ?';
-                values.push(filters.region);
-            }
-            if (filters.inStock !== null) {
-                if (filters.inStock) {
-                    query += ' AND s.stock > 0';
-                } else {
-                    query += ' AND s.stock = 0';
-                }
-            }
-
-            query += ' ORDER BY s.created_at DESC';
-
-            if (filters.limit) {
-                query += ' LIMIT ?';
-                values.push(filters.limit);
-                if (filters.offset) {
-                    query += ' OFFSET ?';
-                    values.push(filters.offset);
-                }
-            }
-
-            const [sarees] = await pool.execute(query, values);
-            console.log('DEBUG getSarees - filters:', filters, 'count:', sarees.length);
-
-            // Get active offers and apply to prices
-            const activeOffers = await OfferModel.getActiveOffers();
 
             // Helper function to calculate discount
             const calculateDiscount = (offer, price) => {
@@ -131,6 +89,9 @@ const BuyerController = {
                 };
             });
 
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('getSarees: returning', sareesWithOffers.length, 'sarees');
+            }
             res.json({
                 success: true,
                 data: sareesWithOffers
@@ -165,8 +126,13 @@ const BuyerController = {
 
             const sarees = searchTerm ? await SareeModel.search(searchTerm, filters) : await SareeModel.findAll(filters);
 
-            // Get active offers and apply to prices
-            const activeOffers = await OfferModel.getActiveOffers();
+            // Get active offers and apply to prices (optional)
+            let activeOffers = [];
+            try {
+                activeOffers = await OfferModel.getActiveOffers();
+            } catch (offerErr) {
+                console.warn('searchSarees: offers failed, continuing without', offerErr.message);
+            }
 
             // Helper function to calculate discount
             const calculateDiscount = (offer, price) => {
@@ -380,6 +346,9 @@ const BuyerController = {
             items.forEach(item => {
                 if (item.image) {
                     item.image = item.image.replace(/\\/g, '/');
+                    if (!item.image.startsWith('/')) {
+                        item.image = '/' + item.image;
+                    }
                 }
             });
 
@@ -705,9 +674,31 @@ const BuyerController = {
                  ORDER BY ws.created_at DESC`
             );
 
+            const sanitizedRows = rows.map(row => {
+                if (row.media_path) {
+                    row.media_path = row.media_path.replace(/\\/g, '/');
+                    if (!row.media_path.startsWith('/') && !row.media_path.startsWith('http')) {
+                        row.media_path = '/' + row.media_path;
+                    }
+                }
+                if (row.media_paths) {
+                    try {
+                        let paths = JSON.parse(row.media_paths);
+                        paths = paths.map(p => {
+                            p = p.replace(/\\/g, '/');
+                            return (!p.startsWith('/') && !p.startsWith('http')) ? '/' + p : p;
+                        });
+                        row.media_paths = JSON.stringify(paths);
+                    } catch (e) {
+                        // Not JSON or empty
+                    }
+                }
+                return row;
+            });
+
             res.json({
                 success: true,
-                data: rows
+                data: sanitizedRows
             });
         } catch (error) {
             console.error('Get approved stories error:', error);
@@ -741,6 +732,25 @@ const BuyerController = {
                 return res.status(403).json({ success: false, message: 'Story pending approval' });
             }
 
+            if (story.media_path) {
+                story.media_path = story.media_path.replace(/\\/g, '/');
+                if (!story.media_path.startsWith('/') && !story.media_path.startsWith('http')) {
+                    story.media_path = '/' + story.media_path;
+                }
+            }
+            if (story.media_paths) {
+                try {
+                    let paths = JSON.parse(story.media_paths);
+                    paths = paths.map(p => {
+                        p = p.replace(/\\/g, '/');
+                        return (!p.startsWith('/') && !p.startsWith('http')) ? '/' + p : p;
+                    });
+                    story.media_paths = JSON.stringify(paths);
+                } catch (e) {
+                    // Not JSON or empty
+                }
+            }
+
             res.json({
                 success: true,
                 data: story
@@ -748,6 +758,31 @@ const BuyerController = {
         } catch (error) {
             console.error('Get story detail error:', error);
             res.status(500).json({ success: false, message: 'Failed to fetch story details' });
+        }
+    },
+
+    // Toggle wishlist
+    async toggleWishlist(req, res) {
+        try {
+            const userId = req.session.userId;
+            const { sareeId } = req.body;
+            const result = await WishlistModel.toggle(userId, sareeId);
+            res.json({ success: true, ...result, message: `Product ${result.action} wishlist` });
+        } catch (error) {
+            console.error('Toggle wishlist error:', error);
+            res.status(500).json({ success: false, message: 'Failed to update wishlist' });
+        }
+    },
+
+    // Get wishlist
+    async getWishlist(req, res) {
+        try {
+            const userId = req.session.userId;
+            const items = await WishlistModel.findByUser(userId);
+            res.json({ success: true, data: items });
+        } catch (error) {
+            console.error('Get wishlist error:', error);
+            res.status(500).json({ success: false, message: 'Failed to fetch wishlist' });
         }
     }
 };

@@ -36,6 +36,17 @@
                     </a>
                 </div>
 
+                <div class="filter-tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="filter-tab active" data-status="all"
+                        style="padding: 0.5rem 1.5rem; border-radius: 100px; border: 1.5px solid var(--color-border); background: white; cursor: pointer; font-weight: 500;">All
+                        Stories</button>
+                    <button class="filter-tab" data-status="live"
+                        style="padding: 0.5rem 1.5rem; border-radius: 100px; border: 1.5px solid var(--color-border); background: white; cursor: pointer; font-weight: 500;">Live</button>
+                    <button class="filter-tab" data-status="pending"
+                        style="padding: 0.5rem 1.5rem; border-radius: 100px; border: 1.5px solid var(--color-border); background: white; cursor: pointer; font-weight: 500;">Pending
+                        Review</button>
+                </div>
+
                 <div id="stories-container" class="weaver-grid">
                     <!-- Loaded via JS -->
                     <div class="glass-card skeleton" style="height: 480px;"></div>
@@ -49,8 +60,8 @@
 
     <script src="/js/api.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/components.js"></script>
     <script src="/js/notifications.js"></script>
+    <script src="/js/components.js"></script>
     <script>
         (async function () {
             const user = await auth.checkAuth();
@@ -59,60 +70,92 @@
                 return;
             }
 
+            let allStories = [];
+            let currentFilter = 'all';
+
             async function loadStories() {
                 const container = document.getElementById('stories-container');
                 try {
                     const response = await api.get('/api/weaver/stories');
-                    const stories = response.data || [];
-
-                    if (stories.length === 0) {
-                        container.className = '';
-                        container.innerHTML = `
-                            <div class="glass-card" style="text-align: center; padding: 5rem 2rem; background: white;">
-                                <div style="font-size: 4rem; margin-bottom: 1.5rem;">✨</div>
-                                <h2 style="font-family: var(--font-heading);">No stories yet</h2>
-                                <p style="color: #666; margin-bottom: 2rem;">Help buyers connect with your craft by sharing moments from your loom.</p>
-                                <a href="/pages/weaver-story.html" class="btn btn-primary">Create Your First Story</a>
-                            </div>`;
-                        return;
-                    }
-
-                    container.innerHTML = stories.map(story => {
-                        const path = `/${(story.media_path || '').replace(/^\/+/, '')}`;
-                        const isVideo = story.media_type === 'video';
-                        const created = new Date(story.created_at).toLocaleDateString();
-                        const statusClass = story.is_approved ? 'approved' : 'pending';
-
-                        return `
-                            <div class="saree-card-premium" style="display: flex; flex-direction: column;">
-                                <div style="height: 400px; position: relative; background:#000; overflow: hidden;">
-                                    ${isVideo
-                                ? `<video src="${path}" style="width: 100%; height: 100%; object-fit: cover;" muted autoplay loop playsinline></video>
-                                           <div style="position:absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Video</div>`
-                                : `<img src="${path}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/assets/images/defaults/story-placeholder.svg'">`
-                            }
-                                    <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
-                                        <span class="status-chip ${statusClass}">${story.is_approved ? 'Live' : 'Moderating'}</span>
-                                        ${story.media_paths && (typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) > 1
-                                ? `<span style="background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--color-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">+${(typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) - 1} More</span>`
-                                : ''}
-                                    </div>
-                                </div>
-                                <div class="saree-card-content" style="flex: 1; display: flex; flex-direction: column;">
-                                    <h3 style="margin: 0 0 0.5rem; font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-dark);">${story.title || 'Untitled Story'}</h3>
-                                    <p style="margin: 0 0 1.5rem; font-size: 0.95rem; color: #666; line-height: 1.6; word-break: break-word;">${story.caption}</p>
-                                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
-                                        <span style="font-size: 0.8rem; color: #999; font-weight: 500;">${created}</span>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteStory(${story.id})" style="padding: 0.4rem 1rem; border-radius: var(--radius-full);">Delete</button>
-                                    </div>
-                                </div>
-                            </div>`;
-                    }).join('');
+                    allStories = response.data || [];
+                    renderStories();
                 } catch (error) {
+                    console.error('Failed to load stories:', error);
                     container.className = '';
                     container.innerHTML = `<div class="glass-card" style="background:#fff5f5;"><p style="color:#c53030;">Failed to sync your stories.</p></div>`;
                 }
             }
+
+            function renderStories() {
+                const container = document.getElementById('stories-container');
+                let filtered = allStories;
+                if (currentFilter === 'live') filtered = allStories.filter(s => s.is_approved);
+                if (currentFilter === 'pending') filtered = allStories.filter(s => !s.is_approved);
+
+                if (filtered.length === 0) {
+                    container.className = '';
+                    container.innerHTML = `
+                        <div class="glass-card" style="text-align: center; padding: 5rem 2rem; background: white;">
+                            <div style="font-size: 4rem; margin-bottom: 1.5rem;">✨</div>
+                            <h2 style="font-family: var(--font-heading);">No ${currentFilter === 'all' ? '' : currentFilter} stories yet</h2>
+                            <p style="color: #666; margin-bottom: 2rem;">Share moments from your loom to connect with buyers.</p>
+                            <a href="/pages/weaver-story.html" class="btn btn-primary">Create Your First Story</a>
+                        </div>`;
+                    return;
+                }
+
+                container.className = 'weaver-grid';
+                container.innerHTML = filtered.map(story => {
+                    const rawPath = story.media_path || '';
+                    const path = rawPath.startsWith('http') ? rawPath : `/${rawPath.replace(/^\/+/, '')}`;
+                    const isVideo = story.media_type === 'video';
+                    const created = new Date(story.created_at).toLocaleDateString();
+                    const statusClass = story.is_approved ? 'approved' : 'pending';
+
+                    return `
+                        <div class="saree-card-premium" style="display: flex; flex-direction: column;">
+                            <div style="height: 400px; position: relative; background:#000; overflow: hidden;">
+                                ${isVideo
+                            ? `<video src="${path}" style="width: 100%; height: 100%; object-fit: cover;" muted autoplay loop playsinline></video>
+                                       <div style="position:absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Video</div>`
+                            : `<img src="${path}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/assets/images/defaults/story-placeholder.svg'">`
+                        }
+                                <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                                    <span class="status-chip ${statusClass}">${story.is_approved ? 'Live' : 'Moderating'}</span>
+                                    ${story.media_paths && (typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) > 1
+                            ? `<span style="background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--color-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">+${(typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) - 1} More</span>`
+                            : ''}
+                                </div>
+                            </div>
+                            <div class="saree-card-content" style="flex: 1; display: flex; flex-direction: column;">
+                                <h3 style="margin: 0 0 0.5rem; font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-dark);">${story.title || 'Untitled Story'}</h3>
+                                <p style="margin: 0 0 1.5rem; font-size: 0.95rem; color: #666; line-height: 1.6; word-break: break-word;">${story.caption}</p>
+                                <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+                                    <span style="font-size: 0.8rem; color: #999; font-weight: 500;">${created}</span>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteStory(${story.id})" style="padding: 0.4rem 1rem; border-radius: var(--radius-full);">Delete</button>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+
+            // Init tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(t => {
+                        t.classList.remove('active');
+                        t.style.background = 'white';
+                        t.style.color = 'var(--color-dark)';
+                        t.style.borderColor = 'var(--color-border)';
+                    });
+                    tab.classList.add('active');
+                    tab.style.background = 'var(--color-primary)';
+                    tab.style.color = 'white';
+                    tab.style.borderColor = 'var(--color-primary)';
+                    currentFilter = tab.dataset.status;
+                    renderStories();
+                });
+            });
 
             window.deleteStory = async function (id) {
                 if (!confirm('This story will be permanently removed. Continue?')) return;
@@ -125,7 +168,7 @@
                 }
             };
 
-            loadStories();
+            await loadStories();
         })();
     </script>
 </body>

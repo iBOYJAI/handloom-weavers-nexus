@@ -74,6 +74,15 @@ app.use('/api', require('./routes/variant.routes')); // Variant routes
 app.use('/api/wishlist', require('./routes/wishlist.routes')); // Wishlist routes
 
 
+// Health / API test route – confirms server and public API are reachable
+app.get('/api/health', (req, res) => {
+    res.json({
+        ok: true,
+        message: 'API is running',
+        endpoints: { sarees: 'GET /api/sarees', categories: 'GET /api/categories' }
+    });
+});
+
 // Debug route to check session (remove before production)
 app.get('/api/debug/session', (req, res) => {
     res.json({

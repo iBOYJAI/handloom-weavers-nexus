@@ -828,8 +828,7 @@
 
                     <div id="tab-featured" class="tab-panel active">
                         <div class="product-scroll" id="featured-grid">
-                            <div style="text-align:center;padding:3rem;grid-column:1/-1;color:#999;">Loading products…
-                            </div>
+                            <div style="text-align:center;padding:3rem;grid-column:1/-1;color:#999;" data-loading>Loading products…</div>
                         </div>
                     </div>
                     <div id="tab-new" class="tab-panel">
@@ -904,316 +903,31 @@
                 </div>
             </section>
 
+            <!-- 8. ARTISAN STORIES SECTION -->
+            <section class="home-section" id="stories-section" style="background: var(--color-white);">
+                <div class="home-section-header">
+                    <div>
+                        <h2 class="home-section-title">Artisan <em>Stories</em></h2>
+                        <p style="color:#999; font-size:0.88rem; margin-top:0.3rem;">Behind every thread is a legacy</p>
+                    </div>
+                    <a href="/pages/story.html" class="view-all-link">Read All Stories ›</a>
+                </div>
+                <div id="stories-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
             <div id="footer-placeholder"></div>
         </main>
     </div>
 
     <script src="/js/api.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/components.js"></script>
     <script src="/js/notifications.js"></script>
+    <script src="/js/components.js"></script>
     <script src="/js/search.js"></script>
-    <script>
-        // ============================================================
-        //  Buyer Home — Inline page logic (replaces buyer-home.js)
-        // ============================================================
-        (async function () {
-            const user = await auth.checkAuth(false);
-
-            /* ---------- Hero CTA ---------- */
-            const heroCta = document.getElementById('hero-cta');
-            const heroSub = document.getElementById('hero-subtitle');
-            if (user) {
-                heroCta.innerHTML = `<a href="#all-sarees" class="btn btn-primary" style="border-radius:var(--radius-full);padding:0.75rem 2rem;">Continue Shopping</a>`;
-                if (heroSub) heroSub.textContent = 'Welcome back! Discover exquisite handloom sarees.';
-            }
-
-            /* Local fallback images — use our renamed assets */
-            const LOCAL_IMGS = [
-                '/assets/images/sarees/saree_001.jpeg',
-                '/assets/images/sarees/saree_002.jpg',
-                '/assets/images/sarees/saree_003.jpg',
-                '/assets/images/sarees/saree_004.jpg',
-                '/assets/images/sarees/saree_005.jpg',
-                '/assets/images/sarees/saree_006.jpg',
-                '/assets/images/sarees/saree_007.jpg',
-                '/assets/images/sarees/saree_008.jpg',
-                '/assets/images/sarees/saree_009.jpg',
-                '/assets/images/sarees/saree_010.jpg',
-                '/assets/images/sarees/saree_012.jpg',
-                '/assets/images/sarees/saree_013.jpg',
-                '/assets/images/sarees/saree_014.jpg',
-                '/assets/images/sarees/saree_015.jpeg',
-                '/assets/images/sarees/saree_018.jpeg',
-                '/assets/images/sarees/saree_021.jpeg',
-                '/assets/images/sarees/saree_025.jpeg',
-                '/assets/images/sarees/saree_027.jpeg',
-                '/assets/images/sarees/saree_029.jpg',
-            ];
-            let imgIdx = 0;
-            function nextImg() { return LOCAL_IMGS[imgIdx++ % LOCAL_IMGS.length]; }
-
-            /* ---------- Offer marquee ---------- */
-            async function loadOffers() {
-                try {
-                    const res = await api.get('/api/offers/active');
-                    const offers = (res.data || []).slice(0, 5);
-                    if (!offers.length) return;
-                    const bar = document.getElementById('offer-marquee-bar');
-                    const track = document.getElementById('marquee-track');
-                    const sep = `<span class="marquee-sep" style="margin:0 2rem;"> ✦ </span>`;
-                    const texts = offers.map(o => {
-                        let t = `<span class="marquee-item">${o.title}`;
-                        if (o.type === 'percentage') t += ` <strong>${o.value}% OFF</strong>`;
-                        else if (o.type === 'fixed') t += ` <strong>₹${o.value} OFF</strong>`;
-                        else if (o.type === 'free_shipping') t += ` <strong>FREE SHIPPING</strong>`;
-                        t += `</span>`;
-                        return t;
-                    }).join(sep);
-                    track.innerHTML = texts + sep + texts + sep;
-                    bar.classList.add('visible');
-
-                    // Also update announcement bar
-                    const ann = document.getElementById('announcement-bar');
-                    if (ann && offers[0]) {
-                        ann.textContent = offers[0].description || `${offers[0].title} — Limited Time Offer`;
-                    }
-                } catch (_) { }
-            }
-
-            /* ---------- Category showcase ---------- */
-            const CATEGORY_IMGS = [
-                '/assets/images/sarees/saree_001.jpeg',
-                '/assets/images/sarees/saree_003.jpg',
-                '/assets/images/sarees/saree_005.jpg',
-                '/assets/images/sarees/saree_007.jpg',
-                '/assets/images/sarees/saree_009.jpg',
-                '/assets/images/sarees/saree_012.jpg',
-                '/assets/images/sarees/saree_014.jpg',
-                '/assets/images/sarees/saree_018.jpeg',
-            ];
-            async function loadCategories() {
-                try {
-                    const res = await api.get('/api/categories');
-                    const cats = res.data || [];
-                    const grid = document.getElementById('category-grid');
-                    if (!grid || !cats.length) return;
-                    grid.innerHTML = cats.map((c, i) => `
-                    <div class="cat-card" onclick="filterByCategory(${c.id}, '${c.name}')" style="cursor: pointer;">
-                        <div class="cat-icon-wrap">
-                            <img src="${CATEGORY_IMGS[i % CATEGORY_IMGS.length]}" alt="${c.name}">
-                        </div>
-                        <span class="cat-name">${c.name}</span>
-                        <span class="cat-count">${c.saree_count || 0} items</span>
-                    </div>
-                `).join('');
-                } catch (e) { console.error('cats', e); }
-            }
-
-            /* ---------- Render product card ---------- */
-            function renderCard(s, index) {
-                const img = s.primary_image || LOCAL_IMGS[index % LOCAL_IMGS.length];
-                const badge = s.is_new ? 'New' : (index === 0 ? 'Popular' : '');
-                const addBtn = user
-                    ? `<button class="btn btn-primary product-card-sm-btn" onclick="addToCart(${s.id},event)">Add Cart</button>`
-                    : `<a href="/pages/login.html" class="btn btn-secondary product-card-sm-btn">Login</a>`;
-                return `
-                <div class="product-card-sm" onclick="window.location.href='/pages/saree-detail.html?id=${s.id}'">
-                    ${badge ? `<span class="product-card-sm-badge">${badge}</span>` : ''}
-                    <img class="product-card-sm-img" src="${img}" alt="${s.title}" onerror="this.src='${LOCAL_IMGS[0]}'">
-                    <div class="product-card-sm-body">
-                        <div class="product-card-sm-cat">${s.category_name || 'Saree'}</div>
-                        <div class="product-card-sm-title">${s.title}</div>
-                        <div class="product-card-sm-weaver">By ${s.weaver_name || 'Artisan Weaver'}</div>
-                    </div>
-                    <div class="product-card-sm-footer">
-                        <span class="product-card-sm-price">₹${Number(s.price).toLocaleString('en-IN')}</span>
-                        ${addBtn}
-                    </div>
-                </div>
-            `;
-            }
-
-            function renderGrid(sarees, containerId, start = 0) {
-                const el = document.getElementById(containerId);
-                if (!el) return;
-                if (!sarees.length) {
-                    el.innerHTML = `<div style="text-align:center;padding:3rem;grid-column:1/-1;color:#999;">No products found.</div>`;
-                    return;
-                }
-                el.innerHTML = sarees.map((s, i) => renderCard(s, start + i)).join('');
-            }
-
-            /* ---------- Load featured / new arrivals ---------- */
-            async function loadTabSarees() {
-                try {
-                    const res = await api.get('/api/sarees?limit=12');
-                    const sarees = res.data || [];
-                    renderGrid(sarees.slice(0, 8), 'featured-grid');
-                    const sorted = [...sarees].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    renderGrid(sorted.slice(0, 8), 'new-arrivals-grid', 8);
-                    // bestseller: sort by price desc as proxy
-                    const best = [...sarees].sort((a, b) => b.price - a.price);
-                    renderGrid(best.slice(0, 8), 'bestseller-grid', 16);
-                } catch (e) { console.error('featured', e); }
-            }
-
-            /* ---------- Category filter tabs ---------- */
-            let currentCategory = null, minPrice = null, maxPrice = null;
-
-            async function loadFilterTabs() {
-                try {
-                    const res = await api.get('/api/categories');
-                    const cats = res.data || [];
-                    const tabs = document.getElementById('category-tabs');
-                    tabs.innerHTML = `<button class="filter-tab active" data-category="all">All</button>` +
-                        cats.map(c => `<button class="filter-tab" data-category="${c.id}">${c.name}</button>`).join('');
-                    tabs.querySelectorAll('.filter-tab').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            tabs.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-                            btn.classList.add('active');
-                            const cat = btn.dataset.category;
-                            currentCategory = cat === 'all' ? null : parseInt(cat);
-                            // check for url param
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const catParam = urlParams.get('category');
-                            if (catParam && parseInt(catParam) === currentCategory) {
-                                // already selected via url
-                            }
-                            loadSarees();
-                        });
-                    });
-                    // If URL has ?category=X, auto-select it
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const catParam = urlParams.get('category');
-                    if (catParam) {
-                        currentCategory = parseInt(catParam);
-                        const target = tabs.querySelector(`[data-category="${catParam}"]`);
-                        if (target) {
-                            tabs.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-                            target.classList.add('active');
-                        }
-                    }
-                } catch (e) { console.error('filter tabs', e); }
-            }
-
-            /* ---------- Filter by category (Helper) ---------- */
-            window.filterByCategory = function (id, name) {
-                currentCategory = id;
-                // Update URL without reload
-                const url = new URL(window.location);
-                if (id) url.searchParams.set('category', id);
-                else url.searchParams.delete('category');
-                window.history.pushState({}, '', url);
-
-                // Update tab UI
-                const tabs = document.getElementById('category-tabs');
-                if (tabs) {
-                    tabs.querySelectorAll('.filter-tab').forEach(b => {
-                        b.classList.remove('active');
-                        if (b.dataset.category == id || (id == null && b.dataset.category == 'all')) {
-                            b.classList.add('active');
-                        }
-                    });
-                }
-
-                // Scroll to section and load
-                document.getElementById('all-sarees').scrollIntoView({ behavior: 'smooth' });
-                loadSarees();
-            };
-
-            /* ---------- Load all sarees ---------- */
-            async function loadSarees() {
-                const grid = document.getElementById('saree-grid');
-                const empty = document.getElementById('empty-state');
-                grid.innerHTML = `<div style="text-align:center;padding:3rem;grid-column:1/-1;color:#999;">Loading…</div>`;
-                grid.style.display = 'grid';
-                empty.style.display = 'none';
-
-                try {
-                    const params = new URLSearchParams();
-                    if (currentCategory) params.append('category', currentCategory);
-                    if (minPrice) params.append('minPrice', minPrice);
-                    if (maxPrice) params.append('maxPrice', maxPrice);
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const searchQuery = urlParams.get('q');
-                    if (searchQuery) params.append('q', searchQuery);
-
-                    const url = searchQuery ? `/api/sarees/search?${params}` : `/api/sarees?${params}`;
-                    const res = await api.get(url);
-                    const list = res.data || [];
-
-                    if (!list.length) {
-                        grid.style.display = 'none';
-                        empty.style.display = 'block';
-                        return;
-                    }
-                    renderGrid(list, 'saree-grid');
-                } catch (e) {
-                    grid.innerHTML = `<div style="text-align:center;padding:3rem;grid-column:1/-1;color:red;">Error loading sarees. Please try again.</div>`;
-                }
-            }
-
-            /* ---------- Add to cart ---------- */
-            window.addToCart = async function (sareeId, evt) {
-                if (evt) evt.stopPropagation();
-                if (!user) { window.location.href = '/pages/login.html'; return; }
-                try {
-                    await api.post('/api/cart/add', { sareeId, quantity: 1 });
-                    notifications.showToast('success', 'Added!', 'Item added to cart');
-                } catch (e) {
-                    notifications.showToast('error', 'Error', e.message || 'Failed');
-                }
-            };
-
-            /* ---------- Tabs ---------- */
-            document.getElementById('product-tab-btns').addEventListener('click', e => {
-                const btn = e.target.closest('.prod-tab');
-                if (!btn) return;
-                document.querySelectorAll('.prod-tab').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                const panel = document.getElementById(`tab-${btn.dataset.tab}`);
-                if (panel) panel.classList.add('active');
-            });
-
-            /* ---------- Price filter ---------- */
-            document.getElementById('apply-filters').addEventListener('click', () => {
-                minPrice = document.getElementById('min-price').value || null;
-                maxPrice = document.getElementById('max-price').value || null;
-                loadSarees();
-            });
-
-            /* ---------- Newsletter ---------- */
-            document.getElementById("whatsapp-form").addEventListener("submit", function (e) {
-                e.preventDefault();
-
-                var name = document.getElementById("userName").value;
-                var phoneNumber = "919876543210"; // Change to your number (without +)
-
-                var message = "Hi, my name is " + name + ". I want to know more about your products.";
-                var whatsappURL = "https://wa.me/" + phoneNumber + "?text=" + encodeURIComponent(message);
-
-                document.getElementById("whatsappLink").href = whatsappURL;
-                document.getElementById("whatsappBox").style.display = "block";
-
-                // Show success toast
-                if (typeof notifications !== 'undefined') {
-                    notifications.showToast('success', 'Connected!', 'Hi ' + name + ', our team will reach out to you soon!');
-                }
-            });
-
-            /* ---------- Kick off all loads ---------- */
-            await loadOffers();
-            await loadCategories();
-            loadTabSarees();
-            await loadFilterTabs();
-            await loadSarees();
-        })();
-
-
-    </script>
+    <script src="/js/pages/buyer-home.js"></script>
 </body>
 
 </html>

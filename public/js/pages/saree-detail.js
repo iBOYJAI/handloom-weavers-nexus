@@ -1,5 +1,5 @@
 // Saree Detail Page Logic
-(async function() {
+(async function () {
     // Allow guest viewing
     const user = await auth.checkAuth(false);
 
@@ -17,11 +17,11 @@
     async function loadSareeDetail() {
         const container = document.getElementById('saree-detail-container');
         container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading...</div>';
-        
+
         try {
             const response = await api.get(`/api/sarees/${sareeId}`);
             saree = response.data;
-            
+
             if (!saree) {
                 container.innerHTML = `
                     <div class="empty-state" style="text-align: center; padding: 3rem;">
@@ -30,7 +30,7 @@
                 `;
                 return;
             }
-            
+
             renderSareeDetail();
         } catch (error) {
             console.error('Load saree detail error:', error);
@@ -47,21 +47,26 @@
     function renderSareeDetail() {
         const container = document.getElementById('saree-detail-container');
         const mainImage = saree.images && saree.images.length > 0 ? saree.images[0].file_path : '/assets/images/no-image.jpg';
-        
+
         container.innerHTML = `
             <div class="saree-detail">
                 <div class="saree-gallery">
                     <img src="${mainImage}" alt="${saree.title}" class="saree-main-image" id="main-image" onerror="this.src='/assets/images/no-image.jpg'">
                     ${saree.images && saree.images.length > 1 ? `
                         <div class="saree-thumbnails">
-                            ${saree.images.map(img => `
+                            ${saree.images.slice(0, 5).map(img => `
                                 <img src="${img.file_path}" alt="Thumbnail" class="saree-thumbnail" onclick="document.getElementById('main-image').src='${img.file_path}'" onerror="this.src='/assets/images/no-image.jpg'">
                             `).join('')}
                         </div>
                     ` : ''}
                 </div>
                 <div class="saree-detail-info">
-                    <h1 class="saree-detail-title">${saree.title}</h1>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <h1 class="saree-detail-title">${saree.title}</h1>
+                        <button class="wishlist-btn" onclick="toggleWishlist(${saree.id})" style="background: white; border: 1.5px solid var(--color-border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--transition-fast);">
+                            <img src="${components.getIconUrl('heart')}" alt="Wishlist" style="width: 22px; height: 22px;">
+                        </button>
+                    </div>
                     
                     ${saree.offer ? `
                         <div style="background: var(--color-light-red); color: white; padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: inline-block;">
@@ -178,11 +183,11 @@
     // Initialize variant selection
     function initializeVariantSelection() {
         const variants = saree.variants;
-        
+
         // Get unique colors
         const colors = [...new Map(variants.map(v => [v.color_name, { name: v.color_name, code: v.color_code }])).values()];
         const colorSelector = document.getElementById('color-selector');
-        
+
         colors.forEach(color => {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -197,7 +202,7 @@
             });
             colorSelector.appendChild(btn);
         });
-        
+
         // Get unique designs
         const designs = [...new Set(variants.map(v => v.design_name))];
         const designSelector = document.getElementById('design-selector');
@@ -207,7 +212,7 @@
             option.textContent = design;
             designSelector.appendChild(option);
         });
-        
+
         designSelector.addEventListener('change', updateVariantSelection);
     }
 
@@ -216,10 +221,10 @@
         const selectedColor = document.querySelector('.color-btn[style*="border-color: var(--color-primary)"]')?.dataset.color;
         const designSelector = document.getElementById('design-selector');
         const selectedDesign = designSelector.value;
-        
+
         if (selectedColor && selectedDesign) {
             selectedVariant = saree.variants.find(v => v.color_name === selectedColor && v.design_name === selectedDesign);
-            
+
             if (selectedVariant) {
                 const infoDiv = document.getElementById('selected-variant-info');
                 infoDiv.style.display = 'block';
@@ -227,7 +232,7 @@
                 const adjustment = selectedVariant.price_adjustment || 0;
                 document.getElementById('variant-price-adjustment').textContent = adjustment > 0 ? `+₹${adjustment}` : adjustment < 0 ? `-₹${Math.abs(adjustment)}` : 'No change';
                 document.getElementById('variant-stock').textContent = selectedVariant.stock > 0 ? selectedVariant.stock + ' available' : 'Out of stock';
-                
+
                 // Update main image if variant has image
                 if (selectedVariant.image_path) {
                     document.getElementById('main-image').src = selectedVariant.image_path;
@@ -248,9 +253,9 @@
         const charCount = document.getElementById('char-count');
         const blouseColorInput = document.getElementById('blouse-color');
         const blouseColorText = document.getElementById('blouse-color-text');
-        
+
         if (!designTypeSelect) return; // Form not rendered yet
-        
+
         designTypeSelect.addEventListener('change', () => {
             const value = designTypeSelect.value;
             if (value) {
@@ -261,15 +266,15 @@
                 designImageGroup.style.display = 'none';
             }
         });
-        
+
         designText.addEventListener('input', () => {
             charCount.textContent = designText.value.length;
         });
-        
+
         blouseColorInput.addEventListener('input', () => {
             blouseColorText.textContent = blouseColorInput.value;
         });
-        
+
         // Image preview
         const designImageInput = document.getElementById('custom-design-image');
         designImageInput.addEventListener('change', (e) => {
@@ -291,24 +296,24 @@
     }
 
     // Add to cart
-    window.addToCart = async function() {
+    window.addToCart = async function () {
         if (!user) {
             window.location.href = '/pages/login.html';
             return;
         }
-        
+
         // Collect customization data
         const blouseColorInput = document.getElementById('blouse-color');
         const designTypeSelect = document.getElementById('custom-design-type');
         const designText = document.getElementById('custom-design-text');
-        
+
         const customization = {
             blouseColor: blouseColorInput ? blouseColorInput.value : null,
             customDesignType: designTypeSelect && designTypeSelect.value ? designTypeSelect.value : null,
             customDesignText: designText && designText.value.trim() ? designText.value.trim() : null,
             customDesignImage: null // Will be handled separately if needed
         };
-        
+
         // If variant selected, use variant price
         let finalPrice = saree.finalPrice || saree.price;
         if (selectedVariant) {
@@ -318,10 +323,10 @@
                 finalPrice = finalPrice - discount;
             }
         }
-        
+
         try {
-            await api.post('/api/cart/add', { 
-                sareeId: saree.id, 
+            await api.post('/api/cart/add', {
+                sareeId: saree.id,
                 quantity: 1,
                 variantId: selectedVariant ? selectedVariant.id : null,
                 customization: customization.customDesignType || customization.customDesignText ? customization : null
@@ -329,6 +334,21 @@
             notifications.showToast('success', 'Success', 'Item added to cart');
         } catch (error) {
             notifications.showToast('error', 'Error', error.message);
+        }
+    };
+
+    // Wishlist logic
+    window.toggleWishlist = async function (sareeId) {
+        if (!user) {
+            window.location.href = '/pages/login.html';
+            return;
+        }
+        try {
+            const id = sareeId || saree.id;
+            const response = await api.post('/api/wishlist/toggle', { sareeId: id });
+            notifications.showToast('success', 'Success', response.message || 'Wishlist updated');
+        } catch (error) {
+            notifications.showToast('error', 'Error', error.message || 'Failed to update wishlist');
         }
     };
 

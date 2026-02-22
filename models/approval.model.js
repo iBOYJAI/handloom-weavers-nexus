@@ -102,7 +102,8 @@ const ApprovalModel = {
     async getPendingSarees() {
         const [rows] = await pool.execute(
             `SELECT s.*, u.name as weaver_name, c.name as category_name,
-                    sa.id as approval_id, sa.created_at as approval_created_at
+                    sa.id as approval_id, sa.created_at as approval_created_at,
+                    (SELECT file_path FROM saree_images WHERE saree_id = s.id AND is_primary = TRUE LIMIT 1) as primary_image
             FROM sarees s
             LEFT JOIN users u ON s.weaver_id = u.id
             LEFT JOIN saree_categories c ON s.category_id = c.id
@@ -110,7 +111,15 @@ const ApprovalModel = {
             WHERE s.is_approved = FALSE
             ORDER BY s.created_at DESC`
         );
-        return rows;
+        return rows.map(row => {
+            if (row.primary_image) {
+                row.primary_image = row.primary_image.replace(/\\/g, '/');
+                if (!row.primary_image.startsWith('/')) {
+                    row.primary_image = '/' + row.primary_image;
+                }
+            }
+            return row;
+        });
     },
 
     // Get pending stories
@@ -124,7 +133,25 @@ const ApprovalModel = {
             WHERE ws.is_approved = FALSE
             ORDER BY ws.created_at DESC`
         );
-        return rows;
+        return rows.map(row => {
+            if (row.media_path) {
+                row.media_path = row.media_path.replace(/\\/g, '/');
+                if (!row.media_path.startsWith('/') && !row.media_path.startsWith('http')) {
+                    row.media_path = '/' + row.media_path;
+                }
+            }
+            if (row.media_paths) {
+                try {
+                    let paths = JSON.parse(row.media_paths);
+                    paths = paths.map(p => {
+                        p = p.replace(/\\/g, '/');
+                        return (!p.startsWith('/') && !p.startsWith('http')) ? '/' + p : p;
+                    });
+                    row.media_paths = JSON.stringify(paths);
+                } catch (e) { }
+            }
+            return row;
+        });
     },
 
     // Get approval history for saree

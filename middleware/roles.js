@@ -9,10 +9,11 @@ const requireRole = (...allowedRoles) => {
             });
         }
         
-        const userRole = req.session.role;
+        const userRole = (req.session.role || '').toString().toLowerCase();
+        const allowedLower = allowedRoles.map(r => (r || '').toString().toLowerCase());
         
-        // Check if role exists and is in allowed roles
-        if (!userRole || !allowedRoles.includes(userRole)) {
+        // Check if role exists and is in allowed roles (case-insensitive)
+        if (!userRole || !allowedLower.includes(userRole)) {
             return res.status(403).json({
                 success: false,
                 message: 'Insufficient permissions'
@@ -33,12 +34,13 @@ const requireWeaverApproved = (req, res, next) => {
         });
     }
     
+    const role = (req.session.role || '').toString().toLowerCase();
     // Allow admin to access weaver routes
-    if (req.session.role === 'admin') {
+    if (role === 'admin') {
         return next();
     }
     
-    if (req.session.role !== 'weaver') {
+    if (role !== 'weaver') {
         return res.status(403).json({
             success: false,
             message: 'Weaver access required'

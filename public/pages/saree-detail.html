@@ -297,6 +297,18 @@
             font-weight: 600;
             margin-bottom: 1rem;
         }
+
+        .heart-icon {
+            width: 24px;
+            height: 24px;
+            fill: #999;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .heart-icon:hover {
+            fill: #ff2e63;
+        }
     </style>
 </head>
 
@@ -327,8 +339,8 @@
 
         <script src="/js/api.js"></script>
         <script src="/js/auth.js"></script>
-        <script src="/js/components.js"></script>
         <script src="/js/notifications.js"></script>
+        <script src="/js/components.js"></script>
         <script>
             (async function () {
                 const user = await auth.checkAuth();
@@ -396,7 +408,7 @@
                             <img src="${mainImage}" alt="${saree.title}" class="product-main-image" id="main-image" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
                             ${saree.images && saree.images.length > 1 ? `
                                 <div class="product-thumbnails">
-                                    ${saree.images.map((img, idx) => `
+                                    ${saree.images.slice(0, 5).map((img, idx) => `
                                         <img src="${img.file_path}" alt="Thumbnail" class="product-thumbnail ${idx === 0 ? 'active' : ''}" 
                                              onclick="changeMainImage('${img.file_path}', this)" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
                                     `).join('')}
@@ -453,11 +465,7 @@
                                 ` : `
                                     <button class="btn-add-cart" disabled style="opacity: 0.5; cursor: not-allowed;">Out of Stock</button>
                                 `}
-                                <button class="btn-wishlist" onclick="toggleWishlist()" title="Add to Wishlist">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                    </svg>
-                                </button>
+                                <button class="btn-wishlist" onclick="toggleWishlist()" title="Add to Wishlist" aria-label="Wishlist"><span class="heart-emoji" style="font-size:1.4rem;line-height:1;">❤</span></button>
                             </div>
                             
                             <div class="collapsible-section">

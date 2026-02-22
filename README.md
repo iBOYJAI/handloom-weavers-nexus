@@ -163,5 +163,6 @@ git push -u origin main
   <p>This project is licensed under the MIT License. Technical and legal provisions are detailed in the <a href="LICENSE">LICENSE</a> file.</p>
   
   <p><b>Developed by iBOY Innovation HUB</b></p>
-  <p><i>Building the future of artisan digital commerce.</i></p>
+  <p><i>"Innovation isn’t just what you do — it’s who YOU are."
+</i></p>
 </div>
