@@ -39,6 +39,10 @@ app.use(express.urlencoded({ extended: true }));
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Chart.js (offline) - serve from node_modules
+app.get('/js/chart.umd.min.js', (req, res) => {
+    res.sendFile(path.join(__dirname, 'node_modules', 'chart.js', 'dist', 'chart.umd.min.js'));
+});
 
 // API routes - Order matters! Public routes first
 app.use('/api/auth', require('./routes/auth.routes'));
