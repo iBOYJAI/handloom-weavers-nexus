@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact Report - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-dark);
+            padding: 8rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            color: var(--color-primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: -4rem auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 3rem;
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Making an <em>Impact</em></h1>
+                <p style="opacity: 0.8;">Empowering artisans, one saree at a time.</p>
+            </section>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-val">500+</span>
+                    <p>Artisans Empowered</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-val">₹2.5Cr</span>
+                    <p>Direct Earnings to Weavers</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-val">25+</span>
+                    <p>Weaving Clusters Revived</p>
+                </div>
+            </div>
+
+            <article style="max-width: 800px; margin: 0 auto 4rem; line-height: 1.8; color: #444; padding: 0 2rem;">
+                <h2>Our Direct-to-Weaver Model</h2>
+                <p>By removing intermediaries, we ensure that over 85% of the final purchase price goes directly to the
+                    weaver's family. This has resulted in a 40% increase in average monthly income for our partner
+                    artisans compared to traditional market channels.</p>
+
+                <h2>Preserving Cultural Heritage</h2>
+                <p>We focus on reviving rare weaving techniques that were bordering on extinction. From the complex
+                    Jamdani of Bengal to the intricate Patola of Gujarat, we help find a modern market for ancient arts.
+                </p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

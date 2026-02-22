@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stories - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="padding: 2rem 1rem;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap;">
+                    <div>
+                        <h1
+                            style="font-family: var(--font-heading); font-size: 3rem; margin: 0; color: var(--color-dark);">
+                            Stories</h1>
+                        <p style="color: #666; font-size: 1.1rem; margin-top: 0.5rem;">Share the magic behind your loom
+                            with your audience.</p>
+                    </div>
+                    <a href="/pages/weaver-story.html" class="btn btn-primary btn-lg"
+                        style="border-radius: var(--radius-full); padding: 1rem 2rem; box-shadow: 0 10px 20px rgba(192, 57, 43, 0.2);">
+                        + Share New Story
+                    </a>
+                </div>
+
+                <div id="stories-container" class="weaver-grid">
+                    <!-- Loaded via JS -->
+                    <div class="glass-card skeleton" style="height: 480px;"></div>
+                    <div class="glass-card skeleton" style="height: 480px;"></div>
+                    <div class="glass-card skeleton" style="height: 480px;"></div>
+                </div>
+            </div>
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            async function loadStories() {
+                const container = document.getElementById('stories-container');
+                try {
+                    const response = await api.get('/api/weaver/stories');
+                    const stories = response.data || [];
+
+                    if (stories.length === 0) {
+                        container.className = '';
+                        container.innerHTML = `
+                            <div class="glass-card" style="text-align: center; padding: 5rem 2rem; background: white;">
+                                <div style="font-size: 4rem; margin-bottom: 1.5rem;">✨</div>
+                                <h2 style="font-family: var(--font-heading);">No stories yet</h2>
+                                <p style="color: #666; margin-bottom: 2rem;">Help buyers connect with your craft by sharing moments from your loom.</p>
+                                <a href="/pages/weaver-story.html" class="btn btn-primary">Create Your First Story</a>
+                            </div>`;
+                        return;
+                    }
+
+                    container.innerHTML = stories.map(story => {
+                        const path = `/${(story.media_path || '').replace(/^\/+/, '')}`;
+                        const isVideo = story.media_type === 'video';
+                        const created = new Date(story.created_at).toLocaleDateString();
+                        const statusClass = story.is_approved ? 'approved' : 'pending';
+
+                        return `
+                            <div class="saree-card-premium" style="display: flex; flex-direction: column;">
+                                <div style="height: 400px; position: relative; background:#000; overflow: hidden;">
+                                    ${isVideo
+                                ? `<video src="${path}" style="width: 100%; height: 100%; object-fit: cover;" muted autoplay loop playsinline></video>
+                                           <div style="position:absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Video</div>`
+                                : `<img src="${path}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/assets/images/defaults/story-placeholder.svg'">`
+                            }
+                                    <div style="position: absolute; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+                                        <span class="status-chip ${statusClass}">${story.is_approved ? 'Live' : 'Moderating'}</span>
+                                        ${story.media_paths && (typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) > 1
+                                ? `<span style="background: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; color: var(--color-dark); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">+${(typeof story.media_paths === 'string' ? JSON.parse(story.media_paths).length : story.media_paths.length) - 1} More</span>`
+                                : ''}
+                                    </div>
+                                </div>
+                                <div class="saree-card-content" style="flex: 1; display: flex; flex-direction: column;">
+                                    <h3 style="margin: 0 0 0.5rem; font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-dark);">${story.title || 'Untitled Story'}</h3>
+                                    <p style="margin: 0 0 1.5rem; font-size: 0.95rem; color: #666; line-height: 1.6; word-break: break-word;">${story.caption}</p>
+                                    <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+                                        <span style="font-size: 0.8rem; color: #999; font-weight: 500;">${created}</span>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteStory(${story.id})" style="padding: 0.4rem 1rem; border-radius: var(--radius-full);">Delete</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }).join('');
+                } catch (error) {
+                    container.className = '';
+                    container.innerHTML = `<div class="glass-card" style="background:#fff5f5;"><p style="color:#c53030;">Failed to sync your stories.</p></div>`;
+                }
+            }
+
+            window.deleteStory = async function (id) {
+                if (!confirm('This story will be permanently removed. Continue?')) return;
+                try {
+                    await api.delete('/api/weaver/stories/' + id);
+                    notifications.showToast('success', 'Removed', 'Your story has been deleted.');
+                    loadStories();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', 'Failed to remove story.');
+                }
+            };
+
+            loadStories();
+        })();
+    </script>
+</body>
+
+</html>

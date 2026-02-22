@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Sarees - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <h1>Manage Sarees</h1>
+            <div id="sarees-container"></div>
+        </main>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/admin-utils.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            let allSarees = [];
+
+            async function loadSarees() {
+                const container = document.getElementById('sarees-container');
+                container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading...</div>';
+
+                try {
+                    const response = await api.get('/api/admin/sarees');
+                    allSarees = response.data || [];
+
+                    if (allSarees.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state" style="text-align: center; padding: 3rem;">
+                                <p style="font-size: 1.2rem; color: var(--color-dark); opacity: 0.7;">No sarees found</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    renderSarees(allSarees);
+                } catch (error) {
+                    console.error('Load sarees error:', error);
+                    container.innerHTML = `
+                        <div class="empty-state" style="text-align: center; padding: 3rem;">
+                            <p style="font-size: 1.2rem; color: var(--color-light-red); margin-bottom: 1rem;">Error loading sarees</p>
+                            <p style="color: var(--color-dark); opacity: 0.6;">${error.message || 'Please try again later'}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            function renderSarees(sarees) {
+                const container = document.getElementById('sarees-container');
+                const categories = [...new Set(sarees.map(s => s.category_name).filter(Boolean))];
+
+                container.innerHTML = `
+                    ${adminUtils.createSearchFilterUI([
+                    {
+                        key: 'is_approved',
+                        label: 'Approval',
+                        options: [
+                            { value: 'all', label: 'All' },
+                            { value: 'approved', label: 'Approved' },
+                            { value: 'pending', label: 'Pending' }
+                        ]
+                    },
+                    {
+                        key: 'is_active',
+                        label: 'Status',
+                        options: [
+                            { value: 'all', label: 'All' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'inactive', label: 'Inactive' }
+                        ]
+                    }
+                ], 'Search sarees by title or weaver...')}
+                    ${adminUtils.createBulkSelectUI(true)}
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" class="bulk-select-all" title="Select all">
+                                    </th>
+                                    <th>ID</th>
+                                    <th style="width:60px;">Image</th>
+                                    <th>Title</th>
+                                    <th>Weaver</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Approval</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${sarees.length > 0 ? sarees.map(s => `
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="bulk-select-item" data-id="${s.id}">
+                                        </td>
+                                        <td>${s.id}</td>
+                                        <td>
+                                            <img src="${s.primary_image || '/assets/images/defaults/saree-placeholder.svg'}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
+                                        </td>
+                                        <td>
+                                            <a href="/pages/saree-detail.html?id=${s.id}" target="_blank" style="color:var(--color-primary);font-weight:600;text-decoration:none;">${s.title}</a>
+                                        </td>
+                                        <td>${s.weaver_name || 'N/A'}</td>
+                                        <td>${s.category_name || 'N/A'}</td>
+                                        <td>₹${parseFloat(s.price || 0).toFixed(2)}</td>
+                                        <td><span style="font-weight:600;color:${s.stock > 0 ? '#27ae60' : '#e74c3c'}">${s.stock > 0 ? s.stock : 'Out'}</span></td>
+                                        <td>${s.is_approved ? '<span class="status-badge status-confirmed">Approved</span>' : '<span class="status-badge status-pending">Pending</span>'}</td>
+                                        <td>${s.is_active ? '<span class="status-badge status-confirmed">Active</span>' : '<span class="status-badge status-cancelled">Inactive</span>'}</td>
+                                        <td>
+                                            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                                <a href="/pages/saree-detail.html?id=${s.id}" target="_blank" class="btn btn-sm" style="background:#f0f4ff;color:#3498db;border:1px solid #3498db;padding:0.25rem 0.6rem;border-radius:4px;font-size:0.75rem;text-decoration:none;display:inline-block;">View</a>
+                                                ${!s.is_approved ? `<button class="btn btn-primary btn-sm" onclick="approveSaree(${s.id})">Approve</button>` : ''}
+                                                ${s.is_active ? `<button class="btn btn-danger btn-sm" onclick="deactivateSaree(${s.id})">Deactivate</button>` : `<button class="btn btn-primary btn-sm" onclick="activateSaree(${s.id})">Reactivate</button>`}
+                                                <button class="btn btn-danger btn-sm" onclick="deleteSaree(${s.id})">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="11" style="text-align: center; padding: 2rem;">No sarees found</td></tr>'}
+                            </tbody>
+
+                        </table>
+                    </div>
+                `;
+
+                // Initialize search and filter
+                adminUtils.initSearchFilter('sarees-container', allSarees, renderSarees, {
+                    searchFields: ['title', 'weaver_name', 'category_name'],
+                    filterTransform: {
+                        is_approved: (value, filter) => {
+                            if (filter === 'all') return true;
+                            if (filter === 'approved') return value === true || value === 1;
+                            if (filter === 'pending') return value === false || value === 0;
+                            return true;
+                        },
+                        is_active: (value, filter) => {
+                            if (filter === 'all') return true;
+                            if (filter === 'active') return value === true || value === 1;
+                            if (filter === 'inactive') return value === false || value === 0;
+                            return true;
+                        }
+                    }
+                });
+
+                // Initialize bulk select
+                adminUtils.initBulkSelect('sarees-container', {
+                    bulkActions: {
+                        delete: async (ids) => {
+                            if (!confirm(`Delete ${ids.length} selected saree(s)?`)) return;
+                            try {
+                                for (const id of ids) {
+                                    await api.delete(`/api/admin/sarees/${id}`);
+                                }
+                                notifications.showToast('success', 'Success', `${ids.length} saree(s) deleted`);
+                                await loadSarees();
+                            } catch (error) {
+                                notifications.showToast('error', 'Error', error.message);
+                            }
+                        },
+                        edit: async (ids) => {
+                            if (ids.length === 1) {
+                                notifications.showToast('info', 'Info', 'Edit saree feature coming soon');
+                            } else {
+                                notifications.showToast('info', 'Info', 'Please select one saree to edit');
+                            }
+                        }
+                    }
+                });
+            }
+
+            window.approveSaree = async function (sareeId) {
+                try {
+                    await api.put(`/api/admin/sarees/${sareeId}/approve`);
+                    notifications.showToast('success', 'Success', 'Saree approved');
+                    await loadSarees();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            window.deactivateSaree = async function (sareeId) {
+                try {
+                    await api.put(`/api/admin/sarees/${sareeId}/deactivate`);
+                    notifications.showToast('success', 'Success', 'Saree deactivated');
+                    await loadSarees();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            window.activateSaree = async function (sareeId) {
+                try {
+                    await api.put(`/api/admin/sarees/${sareeId}/activate`);
+                    notifications.showToast('success', 'Success', 'Saree reactivated');
+                    await loadSarees();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            window.deleteSaree = async function (sareeId) {
+                if (!confirm('Delete this saree?')) return;
+                try {
+                    await api.delete(`/api/admin/sarees/${sareeId}`);
+                    notifications.showToast('success', 'Success', 'Saree deleted');
+                    await loadSarees();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            await loadSarees();
+        })();
+    </script>
+</body>
+
+</html>

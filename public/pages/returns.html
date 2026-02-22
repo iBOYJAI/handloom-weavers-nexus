@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Returns & Exchanges - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-surface);
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+        }
+
+        .info-content {
+
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 1.8;
+            color: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Returns & <em>Exchanges</em></h1>
+            </section>
+
+            <article class="info-content">
+                <h2>Our Policy</h2>
+                <p>We want you to love your handloom purchase. If you are not entirely satisfied, we are here to help.
+                    You have 7 calendar days to return an item from the date you received it.</p>
+
+                <h2>Conditions for Return</h2>
+                <ul>
+                    <li>The item must be unused and in the same condition that you received it.</li>
+                    <li>The item must be in its original packaging with all tags intact.</li>
+                    <li>Please note that slight irregularities in weave or color are characteristics of handloom and are
+                        not considered defects.</li>
+                </ul>
+
+                <h2>How to Initiate a Return</h2>
+                <p>To initiate a return, please email us at returns@handloomnexus.com with your order number and images
+                    of the product. Once approved, we will arrange for a pickup.</p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saree Details - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .product-detail-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .breadcrumbs {
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--color-dark);
+            opacity: 0.7;
+        }
+
+        .breadcrumbs a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .product-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        @media (max-width: 968px) {
+            .product-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product-gallery {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .product-main-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            background: var(--color-surface);
+        }
+
+        .product-thumbnails {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .product-thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .product-thumbnail:hover,
+        .product-thumbnail.active {
+            border-color: var(--color-primary);
+        }
+
+        .product-info {
+            padding: 1rem 0;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--color-surface);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: var(--color-dark);
+        }
+
+        .product-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--color-dark);
+        }
+
+        .product-price {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 1rem;
+        }
+
+        .product-price .original-price {
+            text-decoration: line-through;
+            opacity: 0.6;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: var(--color-dark);
+        }
+
+        .delivery-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .delivery-info svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .size-selector {
+            margin-bottom: 2rem;
+        }
+
+        .size-selector label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .size-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .size-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--color-border);
+            background: white;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .size-btn:hover {
+            border-color: var(--color-primary);
+        }
+
+        .size-btn.selected {
+            background: var(--color-dark);
+            color: white;
+            border-color: var(--color-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            padding: 1rem 2rem;
+            background: var(--color-dark);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add-cart:hover {
+            background: var(--color-primary);
+        }
+
+        .btn-wishlist {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--color-border);
+            background: white;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-wishlist:hover {
+            border-color: var(--color-primary);
+        }
+
+        .collapsible-section {
+            border-top: 1px solid var(--color-border);
+            padding: 1.5rem 0;
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .collapsible-content {
+            display: block;
+            color: var(--color-dark);
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+
+        .collapsible-content.hidden {
+            display: none;
+        }
+
+        .shipping-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .shipping-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+        }
+
+        .shipping-item svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .blouse-color-selector {
+            margin-bottom: 2rem;
+        }
+
+        .blouse-color-selector label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .blouse-colors {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .blouse-color-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .blouse-color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .blouse-color-btn.selected {
+            border-color: var(--color-dark);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-dark);
+        }
+
+        .offer-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--color-light-red);
+            color: white;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="">
+                <div class="breadcrumbs" id="breadcrumbs"
+                    style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: #888;">
+                    <a href="/pages/buyer-home.html"
+                        style="color: var(--color-primary); text-decoration: none; font-weight: 500;">Home</a>
+                    <span>/</span>
+                    <span style="color: var(--color-dark);">Product Details</span>
+                </div>
+
+                <div id="saree-detail-container">
+                    <div style="text-align: center; padding: 4rem;">
+                        <div class="loader" style="margin: 0 auto;"></div>
+                        <p style="margin-top: 1rem; color: #666;">Loading product details...</p>
+                    </div>
+                </div>
+
+                <div id="footer-placeholder" style="margin-top: 5rem;"></div>
+            </div>
+        </main>
+
+        <script src="/js/api.js"></script>
+        <script src="/js/auth.js"></script>
+        <script src="/js/components.js"></script>
+        <script src="/js/notifications.js"></script>
+        <script>
+            (async function () {
+                const user = await auth.checkAuth();
+                const params = new URLSearchParams(window.location.search);
+                const sareeId = params.get('id');
+                if (!sareeId) {
+                    window.location.href = '/pages/buyer-home.html';
+                    return;
+                }
+
+                const DELIVERY_DAYS = '3-4 Working Days';
+                const PACKAGE_TYPE = 'Regular Package';
+
+                function formatOfferDiscount(offer) {
+                    if (!offer) return 'No discount';
+                    const t = offer.type;
+                    const v = offer.value;
+                    if (t === 'percentage') return (parseFloat(v) || 0).toFixed(0) + '% OFF';
+                    if (t === 'fixed') return '₹' + (parseFloat(v) || 0).toFixed(0) + ' OFF';
+                    if (t === 'free_shipping') return 'Free Shipping';
+                    if (t === 'bogo') return 'Buy One Get One';
+                    return offer.title || 'Special Offer';
+                }
+
+                function getDeliveryCutoffMessage() {
+                    const now = new Date();
+                    const cutoff = new Date(now);
+                    cutoff.setHours(14, 0, 0, 0);
+                    if (now >= cutoff) {
+                        const tomorrow = new Date(now);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        tomorrow.setHours(14, 0, 0, 0);
+                        const ms = tomorrow - now;
+                        const h = Math.floor(ms / 3600000);
+                        const m = Math.floor((ms % 3600000) / 60000);
+                        return `Order within ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} to get delivery in ${DELIVERY_DAYS}`;
+                    }
+                    const ms = cutoff - now;
+                    const h = Math.floor(ms / 3600000);
+                    const m = Math.floor((ms % 3600000) / 60000);
+                    return `Order within ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} to get delivery in ${DELIVERY_DAYS}`;
+                }
+
+                try {
+                    const response = await api.get(`/api/sarees/${sareeId}`);
+                    const saree = response.data;
+                    const container = document.getElementById('saree-detail-container');
+
+                    const mainImage = saree.images && saree.images.length > 0 ? saree.images[0].file_path : '/assets/images/defaults/saree-placeholder.svg';
+                    const blouseColors = saree.blouse_colors || [];
+
+                    // Shipping & Packaging Metadata
+                    const DELIVERY_DAYS = saree.delivery_days || '3 - 5 Working Days';
+                    const PACKAGE_TYPE = saree.package_type || 'Eco-Friendly Box';
+
+                    const estStart = new Date();
+                    estStart.setDate(estStart.getDate() + 5);
+                    const estEnd = new Date();
+                    estEnd.setDate(estEnd.getDate() + 7);
+                    const estArrivalStr = estStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ' - ' + estEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                    container.innerHTML = `
+                    <div class="product-detail-grid">
+                        <div class="product-gallery">
+                            <img src="${mainImage}" alt="${saree.title}" class="product-main-image" id="main-image" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
+                            ${saree.images && saree.images.length > 1 ? `
+                                <div class="product-thumbnails">
+                                    ${saree.images.map((img, idx) => `
+                                        <img src="${img.file_path}" alt="Thumbnail" class="product-thumbnail ${idx === 0 ? 'active' : ''}" 
+                                             onclick="changeMainImage('${img.file_path}', this)" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="product-info">
+                            <span class="category-tag">${saree.category_name}</span>
+                            <h1 class="product-title">${saree.title}</h1>
+                            
+                            ${saree.offer ? `
+                                <div class="offer-badge">
+                                    ${saree.offer.title} — ${formatOfferDiscount(saree.offer)}
+                                </div>
+                            ` : ''}
+                            
+                            <div class="product-price">
+                                ${saree.offer ? `
+                                    <span class="original-price">₹${parseFloat(saree.originalPrice || saree.price).toFixed(2)}</span>
+                                ` : ''}
+                                <span>₹${parseFloat(saree.finalPrice || saree.price).toFixed(2)}</span>
+                            </div>
+                            
+                            <div class="delivery-info">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                <span id="delivery-message">${getDeliveryCutoffMessage()}</span>
+                            </div>
+                            
+                            ${blouseColors.length > 0 ? `
+                                <div class="blouse-color-selector">
+                                    <label>Select Blouse Color:</label>
+                                    <div class="blouse-colors" id="blouse-colors-container">
+                                        ${blouseColors.map((color, idx) => `
+                                            <button type="button" class="blouse-color-btn ${idx === 0 ? 'selected' : ''}" 
+                                                    style="background: ${color};" 
+                                                    data-color="${color}"
+                                                    title="${color}"
+                                                    onclick="selectBlouseColor('${color}', this)"></button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="action-buttons">
+                                ${saree.stock > 0 ? `
+                                    ${user ? `
+                                        <button class="btn-add-cart" onclick="addToCart()">Add to Cart</button>
+                                    ` : `
+                                        <a href="/pages/login.html" class="btn-add-cart" style="text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Login to Add to Cart</a>
+                                    `}
+                                ` : `
+                                    <button class="btn-add-cart" disabled style="opacity: 0.5; cursor: not-allowed;">Out of Stock</button>
+                                `}
+                                <button class="btn-wishlist" onclick="toggleWishlist()" title="Add to Wishlist">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div class="collapsible-section">
+                                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                    <span>Description & Fit</span>
+                                    <span>▲</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <p>${saree.description}</p>
+                                    <div style="margin-top: 1rem;">
+                                        <p><strong>Weaver:</strong> ${saree.weaver_name}${saree.weaver_region ? ` (${saree.weaver_region})` : ''}</p>
+                                        <p><strong>Stock:</strong> ${saree.stock > 0 ? saree.stock + ' available' : 'Out of stock'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="collapsible-section">
+                                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                                    <span>Shipping</span>
+                                    <span>▲</span>
+                                </div>
+                                <div class="collapsible-content">
+                                    <div class="shipping-info">
+                                        <div class="shipping-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                            </svg>
+                                            <div>
+                                                <div style="font-weight: 600;">Discount</div>
+                                                <div style="font-size: 0.9rem; opacity: 0.7;">${formatOfferDiscount(saree.offer)}</div>
+                                            </div>
+                                        </div>
+                                        <div class="shipping-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                            </svg>
+                                            <div>
+                                                <div style="font-weight: 600;">Package</div>
+                                                <div style="font-size: 0.9rem; opacity: 0.7;">${PACKAGE_TYPE}</div>
+                                            </div>
+                                        </div>
+                                        <div class="shipping-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="1" y="3" width="22" height="18" rx="2"></rect>
+                                                <line x1="1" y1="9" x2="23" y2="9"></line>
+                                            </svg>
+                                            <div>
+                                                <div style="font-weight: 600;">Delivery Time</div>
+                                                <div style="font-size: 0.9rem; opacity: 0.7;">${DELIVERY_DAYS}</div>
+                                            </div>
+                                        </div>
+                                        <div class="shipping-item">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            <div>
+                                                <div style="font-weight: 600;">Est. Arrival</div>
+                                                <div style="font-size: 0.9rem; opacity: 0.7;">${estArrivalStr}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                    let selectedBlouseColor = blouseColors.length > 0 ? blouseColors[0] : null;
+                    let selectedVariant = null;
+
+                    window.changeMainImage = function (src, element) {
+                        document.getElementById('main-image').src = src;
+                        document.querySelectorAll('.product-thumbnail').forEach(thumb => thumb.classList.remove('active'));
+                        element.classList.add('active');
+                    };
+
+                    window.selectBlouseColor = function (color, element) {
+                        selectedBlouseColor = color;
+                        document.querySelectorAll('.blouse-color-btn').forEach(btn => btn.classList.remove('selected'));
+                        element.classList.add('selected');
+                    };
+
+                    window.toggleCollapsible = function (header) {
+                        const content = header.nextElementSibling;
+                        const arrow = header.querySelector('span:last-child');
+                        content.classList.toggle('hidden');
+                        arrow.textContent = content.classList.contains('hidden') ? '▼' : '▲';
+                    };
+
+                    let wishlistInProgress = false;
+                    let isInWishlist = false;
+
+                    // Load initial wishlist state
+                    if (user) {
+                        try {
+                            const wlRes = await api.get(`/api/wishlist/check/${saree.id}`);
+                            isInWishlist = wlRes.data?.inWishlist || false;
+                            updateWishlistBtn(isInWishlist);
+                        } catch (e) { /* ignore */ }
+                    }
+
+                    function updateWishlistBtn(inWL) {
+                        const btn = document.querySelector('.btn-wishlist');
+                        if (!btn) return;
+                        btn.title = inWL ? 'Remove from Wishlist' : 'Add to Wishlist';
+                        btn.style.background = inWL ? '#fff0f0' : 'white';
+                        btn.style.borderColor = inWL ? 'var(--color-primary)' : 'var(--color-border)';
+                        const path = btn.querySelector('path');
+                        if (path) path.style.fill = inWL ? 'var(--color-primary)' : 'none';
+                    }
+
+                    window.toggleWishlist = async function () {
+                        if (!user) {
+                            window.location.href = '/pages/login.html';
+                            return;
+                        }
+                        if (wishlistInProgress) return;
+                        wishlistInProgress = true;
+                        try {
+                            const res = await api.post('/api/wishlist/toggle', { sareeId: saree.id });
+                            isInWishlist = res.data?.inWishlist;
+                            updateWishlistBtn(isInWishlist);
+                            notifications.showToast('success', isInWishlist ? 'Saved!' : 'Removed',
+                                isInWishlist ? 'Added to your wishlist' : 'Removed from wishlist');
+                        } catch (err) {
+                            notifications.showToast('error', 'Error', err.message || 'Failed to update wishlist');
+                        } finally {
+                            wishlistInProgress = false;
+                        }
+                    };
+
+                    window.addToCart = async function () {
+
+                        if (!user) {
+                            window.location.href = '/pages/login.html';
+                            return;
+                        }
+
+                        const customization = {
+                            blouseColor: selectedBlouseColor,
+                            customDesignType: null,
+                            customDesignText: null
+                        };
+
+                        try {
+                            await api.post('/api/cart/add', {
+                                sareeId: saree.id,
+                                quantity: 1,
+                                variantId: selectedVariant ? selectedVariant.id : null,
+                                customization: selectedBlouseColor ? customization : null
+                            });
+                            notifications.showToast('success', 'Success', 'Item added to cart');
+                        } catch (error) {
+                            notifications.showToast('error', 'Error', error.message);
+                        }
+                    };
+                } catch (error) {
+                    document.getElementById('saree-detail-container').innerHTML = '<p>Error loading saree details</p>';
+                }
+            })();
+        </script>
+</body>
+
+</html>

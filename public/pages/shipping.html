@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Policy - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-surface);
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+        }
+
+        .info-content {
+
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 1.8;
+            color: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Shipping <em>Policy</em></h1>
+            </section>
+
+            <article class="info-content">
+                <h2>Direct from the Loom</h2>
+                <p>Your order is shipped directly from the weaver's location to your doorstep. This ensures authenticity
+                    and supports the local ecosystem. Most orders are processed within 48 hours.</p>
+
+                <h2>Delivery Times</h2>
+                <ul>
+                    <li><strong>Domestic (India):</strong> 5-9 business days.</li>
+                    <li><strong>International:</strong> 12-18 business days.</li>
+                </ul>
+
+                <h2>Shipping Charges</h2>
+                <p>We offer free shipping on orders above ₹2,000 within India. For orders below this amount, a flat fee
+                    of ₹150 applies. International shipping is calculated at checkout based on location and weight.</p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

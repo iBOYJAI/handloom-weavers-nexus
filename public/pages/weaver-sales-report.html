@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Weaver Dashboard</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        @media print {
+
+            .sidebar,
+            .header,
+            .filter-section,
+            .export-btns,
+            .app-shell #header-placeholder,
+            .app-shell #sidebar-placeholder {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .glass-card,
+            .sales-chart-premium {
+                border: none !important;
+                box-shadow: none !important;
+                background: transparent !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="padding: 2rem 1rem;">
+                <!-- Header with Export Actions -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap;">
+                    <div>
+                        <h1
+                            style="font-family: var(--font-heading); font-size: 3.5rem; margin: 0; color: var(--color-dark); letter-spacing: -2px;">
+                            Business Intelligence</h1>
+                        <p style="color: #888; font-size: 1.1rem; margin-top: 0.5rem;">Analytical overview of your
+                            artisanal performance</p>
+                    </div>
+                    <div class="export-btns" style="display: flex; gap: 0.75rem;">
+                        <button onclick="exportCSV()" class="btn btn-secondary"
+                            style="border-radius: var(--radius-full); padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; border: 1.5px solid var(--color-border);">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Export CSV
+                        </button>
+                        <button onclick="window.print()" class="btn btn-primary"
+                            style="border-radius: var(--radius-full); padding: 0.8rem 2rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; box-shadow: 0 10px 20px rgba(192, 57, 43, 0.15);">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M17 17h2a2 2 0 002-2v-5a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                                </path>
+                            </svg>
+                            Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Tiles -->
+                <div class="dashboard-grid" id="stats-summary" style="margin-bottom: 2.5rem;">
+                    <div class="glass-card" style="background: white;">
+                        <div
+                            style="color: #999; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+                            Total Revenue</div>
+                        <div id="total-revenue"
+                            style="font-size: 2.25rem; font-weight: 800; color: var(--color-primary); letter-spacing: -1px;">
+                            ₹0</div>
+                    </div>
+                    <div class="glass-card" style="background: white;">
+                        <div
+                            style="color: #999; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+                            Total Sold</div>
+                        <div id="total-orders"
+                            style="font-size: 2.25rem; font-weight: 800; color: var(--color-dark); letter-spacing: -1px;">
+                            0</div>
+                    </div>
+                    <div class="glass-card" style="background: white;">
+                        <div
+                            style="color: #999; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+                            Success Rate</div>
+                        <div id="success-rate"
+                            style="font-size: 2.25rem; font-weight: 800; color: #27ae60; letter-spacing: -1px;">0%</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+                    <div>
+                        <!-- Main Transactions Table -->
+                        <div class="glass-card" style="background: white; padding: 0;">
+                            <div
+                                style="padding: 1.5rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin: 0;">Transaction
+                                    Ledger</h3>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <select id="status-filter"
+                                        style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.85rem;">
+                                        <option value="all">All Status</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="delivered">Delivered</option>
+                                    </select>
+                                    <select id="date-filter"
+                                        style="padding: 0.5rem; border-radius: 8px; border: 1px solid var(--color-border); font-size: 0.85rem;">
+                                        <option value="30">Last 30 Days</option>
+                                        <option value="90">Last 3 Months</option>
+                                        <option value="all">All Time</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table class="data-table" style="box-shadow: none; border-radius: 0;">
+                                    <thead style="background: #fafafa;">
+                                        <tr>
+                                            <th>Order & Item</th>
+                                            <th>Amount</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="report-table-body">
+                                        <!-- Loaded via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Chart / Summary -->
+                    <div>
+                        <div class="sales-chart-premium" style="padding: 1.5rem;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h4 style="font-family: var(--font-heading); margin: 0;">Trends</h4>
+                                <span id="chart-offline-msg"
+                                    style="display:none; font-size: 0.65rem; color: #e67e22; font-weight: 700; text-transform: uppercase;">Offline
+                                    Data</span>
+                            </div>
+                            <div id="chart-bars">
+                                <!-- Loaded via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        let reportData = [];
+        const CACHE_KEY = 'weaver_sales_report_cache';
+
+        async function loadReport() {
+            const body = document.getElementById('report-table-body');
+            const bars = document.getElementById('chart-bars');
+            const offlineMsg = document.getElementById('chart-offline-msg');
+
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 4rem;"><div class="loader" style="margin: 0 auto;"></div></td></tr>';
+
+            try {
+                const status = document.getElementById('status-filter').value;
+                const days = document.getElementById('date-filter').value;
+
+                let rows = [];
+                if (navigator.onLine) {
+                    const response = await api.get(`/api/weaver/sales-report?status=${status}&days=${days}`);
+                    const raw = response.data;
+                    rows = Array.isArray(raw) ? raw : (raw && raw.orders ? flattenOrdersToRows(raw.orders) : []);
+                    // Cache the successful online fetch
+                    localStorage.setItem(CACHE_KEY, JSON.stringify({ rows, timestamp: Date.now() }));
+                    if (offlineMsg) offlineMsg.style.display = 'none';
+                } else {
+                    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+                    rows = cached.rows || [];
+                    if (offlineMsg) offlineMsg.style.display = 'inline-block';
+                    notifications.showToast('info', 'Offline Mode', 'Showing cached data.');
+                }
+
+                // Filtering if cached data is used or status changed
+                const daysNum = days === 'all' ? null : parseInt(days, 10);
+                if (daysNum) {
+                    const cutoff = new Date();
+                    cutoff.setDate(cutoff.getDate() - daysNum);
+                    rows = rows.filter(r => new Date(r.created_at) >= cutoff);
+                }
+                if (status !== 'all') {
+                    rows = rows.filter(r => (r.status || '').toLowerCase() === status);
+                }
+
+                reportData = rows;
+                renderStats(rows);
+                renderTable(rows);
+                renderChart(rows);
+
+            } catch (error) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color: #c53030;">Failed to sync data.</td></tr>';
+            }
+        }
+
+        function flattenOrdersToRows(orders) {
+            const rows = [];
+            (orders || []).forEach(order => {
+                (order.items || []).forEach(item => {
+                    rows.push({
+                        order_id: order.id,
+                        saree_title: item.saree_title || 'Saree',
+                        price: parseFloat(item.price_at_purchase || item.price || 0),
+                        quantity: parseInt(item.quantity || 1, 10),
+                        created_at: order.created_at,
+                        status: order.status
+                    });
+                });
+            });
+            return rows;
+        }
+
+        function renderStats(rows) {
+            const completed = rows.filter(r => ['completed', 'delivered'].includes((r.status || '').toLowerCase()));
+            const totalRevenue = completed.reduce((sum, r) => sum + (r.price * r.quantity), 0);
+            const totalItems = rows.length;
+            const successRate = totalItems > 0 ? (completed.length / totalItems * 100).toFixed(0) : 0;
+
+            document.getElementById('total-revenue').textContent = `₹${Math.round(totalRevenue).toLocaleString()}`;
+            document.getElementById('total-orders').textContent = totalItems;
+            document.getElementById('success-rate').textContent = `${successRate}%`;
+        }
+
+        function renderTable(rows) {
+            const body = document.getElementById('report-table-body');
+            if (rows.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 4rem; color: #999;">No transaction history.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = rows.map(r => `
+                <tr style="border-bottom: 1px solid #f8f9fa;">
+                    <td style="padding: 1.25rem 1.5rem;">
+                        <div style="font-weight: 700; color: var(--color-dark); margin-bottom: 0.25rem;">#ORD-${r.order_id}</div>
+                        <div style="font-size: 0.85rem; color: #666;">${r.saree_title} × ${r.quantity}</div>
+                    </td>
+                    <td style="font-weight: 700; color: var(--color-primary);">₹${Math.round(r.price * r.quantity).toLocaleString()}</td>
+                    <td style="color: #666; font-size: 0.85rem;">${new Date(r.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</td>
+                    <td><span class="status-chip ${r.status.toLowerCase()}">${r.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderChart(rows) {
+            const bars = document.getElementById('chart-bars');
+            const byDate = {};
+            rows.forEach(r => {
+                const d = (r.created_at || '').slice(0, 10);
+                if (!byDate[d]) byDate[d] = 0;
+                byDate[d] += (r.price * r.quantity);
+            });
+
+            const sorted = Object.entries(byDate).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
+            const maxVal = Math.max(1, ...sorted.map(([, v]) => v));
+
+            bars.innerHTML = sorted.map(([date, val]) => {
+                const pct = (val / maxVal) * 100;
+                const label = new Date(date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                return `
+                    <div class="chart-bar-premium" style="margin-bottom: 1.25rem;">
+                        <span class="chart-bar-label" style="width: 50px; font-size: 0.75rem;">${label}</span>
+                        <div class="chart-bar-container" style="height: 12px; background: #f0f0f0;">
+                            <div class="chart-bar-fill" style="width: ${pct}%;"></div>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            if (sorted.length === 0) {
+                bars.innerHTML = '<p style="text-align:center; color:#999; font-size:0.8rem; margin:2rem 0;">No trend data.</p>';
+            }
+        }
+
+        function exportCSV() {
+            if (reportData.length === 0) return notifications.showToast('info', 'Notice', 'Nothing to export.');
+            const headers = ['Order ID', 'Item', 'Price', 'Qty', 'Total', 'Date', 'Status'];
+            const csv = [headers.join(','), ...reportData.map(r => [r.order_id, r.saree_title, r.price, r.quantity, r.price * r.quantity, r.created_at.slice(0, 10), r.status].join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nexus_sales_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+        }
+
+        document.getElementById('status-filter').addEventListener('change', loadReport);
+        document.getElementById('date-filter').addEventListener('change', loadReport);
+        document.addEventListener('DOMContentLoaded', loadReport);
+    </script>
+</body>
+
+</html>

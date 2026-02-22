@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artisan Story - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .story-hero {
+            position: relative;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .story-hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .story-hero-bg img,
+        .story-hero-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            filter: blur(2px);
+        }
+
+        .story-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8));
+            z-index: 2;
+        }
+
+        .story-main-content {
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .artisan-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 100px;
+            margin-bottom: 2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .story-title {
+            font-family: var(--font-heading);
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            letter-spacing: -2px;
+        }
+
+        .story-media-container {
+            margin: -10vh auto 4rem;
+            max-width: 1000px;
+            width: 95%;
+            position: relative;
+            z-index: 10;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.25);
+            background: #000;
+        }
+
+        .story-media-container img,
+        .story-media-container video {
+            width: 100%;
+            display: block;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        .story-body {
+            max-width: 750px;
+            margin: 0 auto 6rem;
+            padding: 0 2rem;
+        }
+
+        .story-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #444;
+            font-family: var(--font-heading);
+            text-align: center;
+        }
+
+        .story-meta {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid #eee;
+        }
+
+        .preview-banner {
+            background: var(--color-primary);
+            color: white;
+            text-align: center;
+            padding: 0.75rem;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="preview-indicator" class="preview-banner" style="display: none;">
+        MODERATION PREVIEW: THIS STORY IS PENDING APPROVAL
+    </div>
+
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div id="loading-state" style="text-align: center; padding: 10rem;">
+                <div class="loader" style="margin: 0 auto;"></div>
+            </div>
+
+            <div id="story-content" style="display: none;">
+                <section class="story-hero">
+                    <div class="story-hero-bg" id="hero-bg"></div>
+                    <div class="story-hero-overlay"></div>
+                    <div class="story-main-content">
+                        <span class="artisan-badge">Heritage Artisan</span>
+                        <h1 class="story-title" id="story-title"></h1>
+                        <p id="story-caption"
+                            style="font-size: 1.5rem; opacity: 0.9; font-family: var(--font-heading); font-style: italic;">
+                        </p>
+                    </div>
+                </section>
+
+                <div class="story-media-container" id="main-media"></div>
+
+                <div class="story-body">
+                    <div id="media-gallery"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+                    </div>
+
+                    <div class="story-text" id="story-description"
+                        style="text-align: left; font-family: var(--font-body); font-size: 1.15rem; color: #333; line-height: 2;">
+                    </div>
+
+                    <div class="story-meta">
+                        <div style="font-size: 0.9rem; color: #999; text-transform: uppercase; margin-bottom: 0.5rem;">
+                            Artisan Origin</div>
+                        <div style="font-weight: 700; font-size: 1.25rem; color: var(--color-dark);"
+                            id="artisan-location"></div>
+
+                        <div style="margin-top: 4rem;">
+                            <button class="btn btn-secondary" onclick="history.back()"
+                                style="border-radius: 100px; padding: 0.75rem 2.5rem;">Back to Collection</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        async function loadStory() {
+            const params = new URLSearchParams(window.location.search);
+            const storyId = params.get('id');
+            const isPreview = params.get('preview') === 'true';
+
+            if (!storyId) {
+                window.location.href = '/pages/story.html';
+                return;
+            }
+
+            if (isPreview) {
+                document.getElementById('preview-indicator').style.display = 'block';
+            }
+
+            try {
+                const response = await api.get(`/api/stories/${storyId}`);
+                const story = response.data;
+
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('story-content').style.display = 'block';
+
+                // Map new fields or fallback to caption
+                document.getElementById('story-title').textContent = story.title || `${story.weaver_name}'s Legacy`;
+                document.getElementById('story-caption').textContent = story.caption;
+                document.getElementById('story-description').innerHTML = (story.description || story.caption).replace(/\n/g, '<br>');
+                document.getElementById('artisan-location').textContent = story.weaver_region || 'Traditional Cluster';
+
+                const mediaPath = '/' + story.media_path.replace(/^\/+/, '');
+                const isVideo = story.media_type === 'video';
+
+                const heroBg = document.getElementById('hero-bg');
+                const mainMedia = document.getElementById('main-media');
+
+                if (isVideo) {
+                    heroBg.innerHTML = `<video src="${mediaPath}" autoplay muted loop></video>`;
+                    mainMedia.innerHTML = `<video src="${mediaPath}" controls autoplay muted></video>`;
+                } else {
+                    heroBg.innerHTML = `<img src="${mediaPath}" onerror="this.src='/assets/images/defaults/story-placeholder.svg'">`;
+                    mainMedia.innerHTML = `<img src="${mediaPath}" onerror="this.src='/assets/images/defaults/story-placeholder.svg'">`;
+                }
+
+                // Handle Gallery
+                const mediaGrid = document.getElementById('media-gallery');
+                if (story.media_paths) {
+                    let paths = [];
+                    try {
+                        paths = typeof story.media_paths === 'string' ? JSON.parse(story.media_paths) : story.media_paths;
+                        const types = typeof story.media_types === 'string' ? JSON.parse(story.media_types) : story.media_types;
+
+                        // Skip the first one if it's already shown as main
+                        paths.slice(1).forEach((path, idx) => {
+                            const p = '/' + path.replace(/^\/+/, '');
+                            const t = types[idx + 1];
+                            const item = document.createElement('div');
+                            item.style.borderRadius = '16px';
+                            item.style.overflow = 'hidden';
+                            item.style.height = '200px';
+                            item.style.cursor = 'pointer';
+                            item.onclick = () => {
+                                if (t === 'video') {
+                                    mainMedia.innerHTML = `<video src="${p}" controls autoplay></video>`;
+                                } else {
+                                    mainMedia.innerHTML = `<img src="${p}">`;
+                                }
+                                window.scrollTo({ top: mainMedia.offsetTop - 100, behavior: 'smooth' });
+                            };
+
+                            if (t === 'video') {
+                                item.innerHTML = `<video src="${p}" style="width:100%;height:100%;object-fit:cover;"></video>`;
+                            } else {
+                                item.innerHTML = `<img src="${p}" style="width:100%;height:100%;object-fit:cover;">`;
+                            }
+                            mediaGrid.appendChild(item);
+                        });
+                    } catch (e) { console.error('Gallery parse error', e); }
+                }
+
+            } catch (error) {
+                console.error('Error loading story:', error);
+                document.getElementById('loading-state').innerHTML = `
+                    <div style="text-align: center; padding: 4rem;">
+                        <h2 style="font-family: var(--font-heading); color: var(--color-dark);">Story Not Accessible</h2>
+                        <p style="color: #666; margin-top: 1rem;">This story might be unavailable or requires approval.</p>
+                        <a href="/pages/story.html" class="btn btn-primary" style="margin-top: 2rem; border-radius: 100px;">Back to Stories</a>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadStory);
+    </script>
+</body>
+
+</html>

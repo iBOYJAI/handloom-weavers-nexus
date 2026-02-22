@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Saree - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="padding: 2rem 1rem;">
+                <div style="margin-bottom: 2rem;">
+                    <h1
+                        style="font-family: var(--font-heading); font-size: 2.25rem; color: var(--color-dark); margin-bottom: 0.5rem;">
+                        Edit Saree Details</h1>
+                    <p style="color: #666; font-size: 1.1rem;">Update your product information and media.</p>
+                </div>
+
+                <form id="edit-form" class="form-section"
+                    style="padding: 2.5rem; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+                    <div class="form-group">
+                        <label class="form-label" for="title">Title</label>
+                        <input type="text" id="title" class="form-input" required minlength="5" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="category">Category</label>
+                        <select id="category" class="form-input" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea id="description" class="form-input" rows="5" required minlength="20"
+                            maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="price">Price (₹)</label>
+                        <input type="number" id="price" class="form-input" required min="1" max="99999" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="stock">Stock</label>
+                        <input type="number" id="stock" class="form-input" required min="0" max="99999">
+                        <span class="form-help">Max 99,999 units</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Current Images</label>
+                        <div id="current-images"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <!-- Injected by JS -->
+                        </div>
+
+                        <label class="form-label">Add New Images (Max 5 total)</label>
+                        <label for="new-images" class="file-upload file-upload-clickable file-upload-zone"
+                            style="background: #fcfcfc;">
+                            <input type="file" id="new-images" multiple accept="image/*">
+                            <span class="file-upload-label">Click to select new images</span>
+                        </label>
+                        <div id="new-images-preview"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
+                    </div>
+                </form>
+            </div>
+            <div id="footer-placeholder"></div>
+    </div>
+    </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const sareeId = params.get('id');
+            if (!sareeId) {
+                window.location.href = '/pages/weaver-dashboard.html';
+                return;
+            }
+
+            // Load categories
+            const categoriesResponse = await api.get('/api/categories');
+            const categories = categoriesResponse.data || [];
+            const categorySelect = document.getElementById('category');
+            categorySelect.innerHTML = categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+
+            // Load saree data
+            try {
+                const response = await api.get(`/api/weaver/sarees/${sareeId}`);
+                if (response.success && response.data) {
+                    const saree = response.data;
+                    document.getElementById('title').value = saree.title;
+                    document.getElementById('category').value = saree.category_id;
+                    document.getElementById('description').value = saree.description;
+                    document.getElementById('price').value = saree.price;
+                    document.getElementById('stock').value = saree.stock;
+
+                    // Load images
+                    const imageContainer = document.getElementById('current-images');
+                    if (saree.images && saree.images.length > 0) {
+                        imageContainer.innerHTML = saree.images.map(img => {
+                            const path = (img.file_path || '').replace(/\\/g, '/');
+                            const src = path.startsWith('http') ? path : (path.startsWith('/') ? path : '/' + path);
+                            return `
+                            <div class="preview-item" style="position: relative;">
+                                <img src="${src}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px;" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
+                                <button type="button" class="btn-delete-img" data-id="${img.id}" style="position: absolute; top: 5px; right: 5px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-primary); box-shadow: 0 2px 5px rgba(0,0,0,0.2);">×</button>
+                            </div>
+                        `;
+                        }).join('');
+
+                        // Attach delete handlers for images
+                        document.querySelectorAll('.btn-delete-img').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const imgId = e.target.closest('button').dataset.id;
+                                if (confirm('Delete this image?')) {
+                                    try {
+                                        await api.delete(`/api/weaver/sarees/images/${imgId}`);
+                                        e.target.closest('.preview-item').remove();
+                                        notifications.showToast('success', 'Deleted', 'Image removed');
+                                    } catch (err) {
+                                        notifications.showToast('error', 'Error', 'Failed to delete image');
+                                    }
+                                }
+                            });
+                        });
+                    } else {
+                        imageContainer.innerHTML = '<p style="color: #999; font-size: 0.9rem;">No images yet</p>';
+                    }
+                }
+            } catch (error) {
+                console.error('Load saree error:', error);
+                notifications.showToast('error', 'Error', 'Failed to load product details');
+            }
+
+            // New images preview
+            document.getElementById('new-images').addEventListener('change', function (e) {
+                const preview = document.getElementById('new-images-preview');
+                preview.innerHTML = '';
+                Array.from(e.target.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (re) => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<img src="${re.target.result}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">`;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            // Update
+            document.getElementById('edit-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append('title', document.getElementById('title').value);
+                formData.append('categoryId', document.getElementById('category').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('price', document.getElementById('price').value);
+                formData.append('stock', document.getElementById('stock').value);
+
+                const newImages = document.getElementById('new-images').files;
+                for (let i = 0; i < newImages.length; i++) {
+                    formData.append('images', newImages[i]);
+                }
+
+                try {
+                    await api.upload(`/api/weaver/sarees/${sareeId}`, formData, 'PUT');
+                    notifications.showToast('success', 'Success', 'Saree updated successfully');
+                    setTimeout(() => window.location.href = '/pages/weaver-dashboard.html', 1000);
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message || 'Failed to update saree');
+                }
+            });
+
+            // Delete
+            document.getElementById('delete-btn').addEventListener('click', async () => {
+                if (!confirm('Delete this saree?')) return;
+                try {
+                    await api.delete(`/api/weaver/sarees/${sareeId}`);
+                    notifications.showToast('success', 'Success', 'Saree deleted');
+                    setTimeout(() => window.location.href = '/pages/weaver-dashboard.html', 1000);
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

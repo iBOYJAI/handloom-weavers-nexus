@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Collection - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="padding: 2rem 1rem;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; gap: 2rem; flex-wrap: wrap;">
+                    <div>
+                        <h1
+                            style="font-family: var(--font-heading); font-size: 3rem; margin: 0; color: var(--color-dark);">
+                            Your Masterpieces</h1>
+                        <p style="color: #666; font-size: 1.1rem; margin-top: 0.5rem;">Managing ${user.name || 'your'}
+                            artisanal collection</p>
+                    </div>
+                    <a href="/pages/weaver-upload.html" class="btn btn-primary btn-lg"
+                        style="border-radius: var(--radius-full); padding: 1rem 2rem; box-shadow: 0 10px 20px rgba(192, 57, 43, 0.2);">
+                        + Add New Creation
+                    </a>
+                </div>
+
+                <div id="sarees-container" class="weaver-grid">
+                    <!-- Loaded via JS -->
+                    <div class="glass-card skeleton" style="height: 450px;"></div>
+                    <div class="glass-card skeleton" style="height: 450px;"></div>
+                    <div class="glass-card skeleton" style="height: 450px;"></div>
+                </div>
+            </div>
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver' || !user.isApproved) {
+                window.location.href = user?.role === 'weaver' ? '/pages/weaver-pending.html' : '/pages/login.html';
+                return;
+            }
+
+            async function loadSarees() {
+                const container = document.getElementById('sarees-container');
+                try {
+                    const response = await api.get('/api/weaver/sarees');
+                    const sarees = response.data || [];
+
+                    if (sarees.length === 0) {
+                        container.className = '';
+                        container.innerHTML = `
+                            <div class="glass-card" style="text-align: center; padding: 5rem 2rem; background: white;">
+                                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🎨</div>
+                                <h2 style="font-family: var(--font-heading);">No sarees yet</h2>
+                                <p style="color: #666; margin-bottom: 2rem;">Start your journey by showcasing your first creation.</p>
+                                <a href="/pages/weaver-upload.html" class="btn btn-primary">Add Your First Saree</a>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = sarees.map(s => {
+                        const img = (s.images && s.images[0]) ? s.images[0].file_path : (s.primary_image || '/assets/images/defaults/saree-placeholder.svg');
+                        const statusClass = s.is_approved ? 'approved' : 'pending';
+                        const statusText = s.is_approved ? 'Live' : 'Approval Pending';
+
+                        return `
+                            <div class="saree-card-premium">
+                                <a href="/pages/saree-detail.html?id=${s.id}" style="text-decoration: none; color: inherit;">
+                                    <img src="${img}" alt="${s.title}" class="saree-card-image" onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
+                                </a>
+                                <div class="saree-card-content">
+                                    <div class="saree-card-header">
+                                        <h3 class="saree-card-title">${s.title}</h3>
+                                        <span class="status-chip ${statusClass}">${statusText}</span>
+                                    </div>
+                                    <div class="saree-card-price">₹${parseFloat(s.price).toLocaleString()}</div>
+                                    <p style="font-size: 0.85rem; color: #777; margin: 0.5rem 0 0 0;">Stock: ${s.stock} units available</p>
+                                    
+                                    <div class="saree-card-footer">
+                                        <div style="display: flex; gap: 0.75rem; width: 100%;">
+                                            <a href="/pages/saree-detail.html?id=${s.id}" class="btn btn-secondary btn-sm" style="flex: 1; text-align: center;">View Page</a>
+                                            <a href="/pages/weaver-edit.html?id=${s.id}" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">Edit Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } catch (error) {
+                    container.className = '';
+                    container.innerHTML = `<div class="glass-card" style="background:#fff5f5; border-color:#feb2b2;"><p style="color: #c53030;">Failed to load your collection. Please refresh.</p></div>`;
+                }
+            }
+            await loadSarees();
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-surface);
+            padding: 6rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+        }
+
+        .info-content {
+
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .info-content h2 {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            margin: 2.5rem 0 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Privacy <em>Policy</em></h1>
+                <p
+                    style="color: var(--color-accent); font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">
+                    Your privacy is our priority</p>
+            </section>
+
+            <article class="info-content">
+                <h2>1. Information Collection</h2>
+                <p>We collect information you provide directly to us, such as when you create an account, make a
+                    purchase, or communicate with us. This includes your name, email address, shipping address, and
+                    payment information.</p>
+
+                <h2>2. How We Use Information</h2>
+                <p>We use the information we collect to provide, maintain, and improve our services, process
+                    transactions, and send you technical notices and support messages.</p>
+
+                <h2>3. Information Sharing</h2>
+                <p>We do not share your personal information with third parties except as described in this policy, such
+                    as with weavers to fulfill your orders or as required by law.</p>
+
+                <h2>4. Data Security</h2>
+                <p>We take reasonable measures to help protect information about you from loss, theft, misuse, and
+                    unauthorized access.</p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

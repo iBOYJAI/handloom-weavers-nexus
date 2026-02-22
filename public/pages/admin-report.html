@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .report-header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #800000 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 2rem;
+        }
+
+        .report-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card {
+            background: var(--color-white);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .report-table {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body {
+                background: white;
+                font-size: 11pt;
+                color: #000;
+            }
+
+            .report-controls,
+            .no-print,
+            #header-placeholder,
+            #sidebar-placeholder,
+            #footer-placeholder,
+            .sidebar,
+            .sidebar-toggle {
+                display: none !important;
+            }
+
+            .main-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            .report-header {
+                background: #800000 !important;
+                color: white !important;
+                padding: 1.5rem !important;
+                border-radius: 0 !important;
+                margin-bottom: 2rem !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+
+            .report-header h1 {
+                font-size: 1.5rem !important;
+            }
+
+            .report-header::after {
+                content: "Official Platform Report";
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .stat-card {
+                page-break-inside: avoid;
+                border: 1px solid #eee !important;
+                box-shadow: none !important;
+                padding: 1rem !important;
+            }
+
+            .stat-value {
+                font-size: 1.5rem !important;
+            }
+
+            .report-table {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .data-table th,
+            .data-table td {
+                border: 1px solid #ddd;
+                padding: 8pt;
+                font-size: 10pt;
+            }
+
+            .data-table th {
+                background: #f0f0f0 !important;
+                color: #000 !important;
+            }
+
+            .status-badge {
+                border: 1px solid #ccc !important;
+                padding: 2pt 6pt !important;
+                background: transparent !important;
+                color: black !important;
+            }
+
+            @page {
+                margin: 2cm;
+
+                @bottom-right {
+                    content: counter(page);
+                }
+            }
+
+            h2,
+            h3 {
+                color: #800000 !important;
+                border-bottom: 2px solid #800000;
+                padding-bottom: 0.5rem;
+                margin-top: 2rem !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        @media print {
+            .print-only {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="report-header">
+                <h1 style="margin: 0 0 0.5rem 0; color: white;">Platform Reports</h1>
+                <p style="margin: 0; opacity: 0.9;">Comprehensive analytics and insights</p>
+            </div>
+
+            <div class="report-controls no-print">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Report Period</label>
+                    <select id="period-select" class="form-input" style="min-width: 150px;">
+                        <option value="weekly">Weekly (Last 7 Days)</option>
+                        <option value="monthly" selected>Monthly (This Month)</option>
+                        <option value="yearly">Yearly (This Year)</option>
+                    </select>
+                </div>
+                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" onclick="loadReport()">Generate Report</button>
+                    <button class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
+                    <button class="btn btn-secondary" onclick="downloadCSV()">Download CSV</button>
+                </div>
+            </div>
+
+            <div id="report-container">
+                <div style="text-align: center; padding: 3rem;">
+                    <p>Select a period and click "Generate Report" to view analytics</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        let currentReportData = null;
+
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            await loadReport();
+        })();
+
+        async function loadReport() {
+            const container = document.getElementById('report-container');
+            const period = document.getElementById('period-select').value;
+            container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading report...</div>';
+
+            try {
+                const response = await api.get(`/api/admin/report?period=${period}`);
+                currentReportData = response.data;
+
+                if (!currentReportData) {
+                    container.innerHTML = '<div class="empty-state">No report data available</div>';
+                    return;
+                }
+
+                renderReport(currentReportData);
+            } catch (error) {
+                console.error('Load report error:', error);
+                container.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 3rem;">
+                        <p style="font-size: 1.2rem; color: var(--color-light-red); margin-bottom: 1rem;">Error loading report</p>
+                        <p style="color: var(--color-dark); opacity: 0.6;">${error.message || 'Please try again later'}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderReport(data) {
+            const container = document.getElementById('report-container');
+            const revenue = parseFloat(data.revenue?.total_revenue || 0);
+            const orders = parseInt(data.revenue?.total_orders || 0);
+            const buyers = parseInt(data.revenue?.unique_buyers || 0);
+            const avgOrder = parseFloat(data.revenue?.avg_order_value || 0);
+
+            container.innerHTML = `
+                <div style="margin-bottom: 2.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-value" style="font-size: clamp(1.5rem, 2.5vw, 2rem);">₹${revenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        </div>
+                        <div class="stat-card" style="border-left-color: #2ecc71;">
+                            <div class="stat-label">Total Orders</div>
+                            <div class="stat-value" style="color: #2ecc71; font-size: clamp(1.5rem, 2.5vw, 2rem);">${orders}</div>
+                        </div>
+                        <div class="stat-card" style="border-left-color: #3498db;">
+                            <div class="stat-label">Unique Buyers</div>
+                            <div class="stat-value" style="color: #3498db; font-size: clamp(1.5rem, 2.5vw, 2rem);">${buyers}</div>
+                        </div>
+                        <div class="stat-card" style="border-left-color: #f39c12;">
+                            <div class="stat-label">Avg Order Value</div>
+                            <div class="stat-value" style="color: #f39c12; font-size: clamp(1.5rem, 2.5vw, 2rem);">₹${avgOrder.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2.5rem;">
+                    <h2 style="margin-bottom: 1.25rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                        Top Performing Products
+                    </h2>
+                    <div class="report-table" style="overflow-x: auto; border: 1px solid var(--color-border);">
+                        <table class="data-table" style="min-width: 600px;">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th style="text-align: center;">Units Sold</th>
+                                    <th style="text-align: right;">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(data.topProducts || []).length > 0 ? data.topProducts.map(p => `
+                                    <tr>
+                                        <td style="font-weight: 500;">${p.title}</td>
+                                        <td><span class="status-badge" style="background: var(--color-surface); color: var(--color-dark); font-size: 0.75rem;">${p.category_name}</span></td>
+                                        <td style="text-align: center;">${p.units_sold}</td>
+                                        <td style="text-align: right; font-weight: 600;">₹${parseFloat(p.revenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="4" style="text-align: center; padding: 2rem;">No products sold in this period</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2.5rem;">
+                    <h2 style="margin-bottom: 1.25rem; color: var(--color-primary); display: flex; align-items: center; gap: 0.5rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+                        Recent Orders
+                    </h2>
+                    <div class="report-table" style="overflow-x: auto; border: 1px solid var(--color-border);">
+                        <table class="data-table" style="min-width: 800px;">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Buyer</th>
+                                    <th style="text-align: center;">Items</th>
+                                    <th style="text-align: right;">Amount</th>
+                                    <th style="text-align: center;">Status</th>
+                                    <th style="text-align: center;">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(data.orders || []).slice(0, 20).map(o => `
+                                    <tr>
+                                        <td><span style="font-family: monospace; font-weight: 600;">#${o.id}</span></td>
+                                        <td>${o.buyer_name || 'N/A'}</td>
+                                        <td style="text-align: center;">${o.item_count || 0}</td>
+                                        <td style="text-align: right; font-weight: 600;">₹${parseFloat(o.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                        <td style="text-align: center;"><span class="status-badge status-${o.status}">${o.status}</span></td>
+                                        <td style="text-align: center; color: #666;">${new Date(o.created_at).toLocaleDateString()}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div style="background: var(--color-white); padding: 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+                    <h3 style="margin-bottom: 1rem; color: var(--color-primary);">User Growth</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div>
+                            <div class="stat-label">New Buyers</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-primary);">${data.userGrowth?.new_buyers || 0}</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">New Weavers</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #2ecc71;">${data.userGrowth?.new_weavers || 0}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="print-footer-content" style="margin-top: 2rem; padding: 1rem; background: var(--color-surface); border-radius: var(--radius-md); text-align: center; color: #666; font-size: 0.875rem;">
+                    Report generated on ${new Date(data.generatedAt).toLocaleString()} | Period: ${data.periodLabel}
+                </div>
+            `;
+        }
+
+        function downloadPDF() {
+            if (!currentReportData) {
+                notifications.showToast('warning', 'No Report', 'Please generate a report first');
+                return;
+            }
+            document.body.classList.add('printing');
+            window.print();
+            document.body.classList.remove('printing');
+        }
+
+        function downloadCSV() {
+            if (!currentReportData) {
+                notifications.showToast('warning', 'No Report', 'Please generate a report first');
+                return;
+            }
+
+            const data = currentReportData;
+            let csv = 'Handloom Weavers Nexus Report\n';
+            csv += `Period: ${data.periodLabel}\n`;
+            csv += `Generated: ${new Date(data.generatedAt).toLocaleString()}\n\n`;
+
+            csv += 'Summary\n';
+            csv += `Total Revenue,${data.revenue?.total_revenue || 0}\n`;
+            csv += `Total Orders,${data.revenue?.total_orders || 0}\n`;
+            csv += `Unique Buyers,${data.revenue?.unique_buyers || 0}\n`;
+            csv += `Avg Order Value,${data.revenue?.avg_order_value || 0}\n\n`;
+
+            csv += 'Top Products\n';
+            csv += 'Product,Category,Units Sold,Revenue\n';
+            (data.topProducts || []).forEach(p => {
+                csv += `"${p.title}","${p.category_name}",${p.units_sold},${p.revenue || 0}\n`;
+            });
+
+            csv += '\nOrders\n';
+            csv += 'Order ID,Buyer,Items,Amount,Status,Date\n';
+            (data.orders || []).forEach(o => {
+                csv += `${o.id},"${o.buyer_name || 'N/A'}",${o.item_count || 0},${o.total_amount || 0},${o.status},${new Date(o.created_at).toLocaleDateString()}\n`;
+            });
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `report-${data.period}-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            notifications.showToast('success', 'Success', 'CSV downloaded');
+        }
+    </script>
+</body>
+
+</html>

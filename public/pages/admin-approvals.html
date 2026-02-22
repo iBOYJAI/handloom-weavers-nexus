@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approvals Management - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .approval-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .approval-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+            border-color: var(--color-primary-light);
+        }
+
+        .media-preview {
+            width: 100px;
+            height: 120px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #f9f9f9;
+        }
+
+        .media-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .approval-info {
+            flex: 1;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .tab-premium {
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #999;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab-premium.active {
+            color: var(--color-primary);
+        }
+
+        .tab-premium.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-primary);
+            border-radius: 10px;
+        }
+
+        #rejection-modal {
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            animation: modalSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container">
+                <div style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <h1
+                            style="font-family: var(--font-heading); font-size: 3rem; color: var(--color-dark); margin-bottom: 0.5rem; letter-spacing: -2px;">
+                            Quality Assurance</h1>
+                        <p style="color: #888; font-size: 1.1rem;">Review and approve handloom assets for the
+                            marketplace</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" id="bulk-approve-btn"
+                            style="display: none; border-radius: 100px; padding: 0.75rem 1.5rem;">
+                            Approve Selected
+                        </button>
+                    </div>
+                </div>
+
+                <div id="tabs" style="display: flex; gap: 1rem; margin-bottom: 3rem; border-bottom: 2px solid #f0f0f0;">
+                    <button class="tab-premium active" data-tab="sarees">
+                        Sarees & Weaves (<span id="saree-count">0</span>)
+                    </button>
+                    <button class="tab-premium" data-tab="stories">
+                        Stories (<span id="story-count">0</span>)
+                    </button>
+                </div>
+
+                <div id="sarees-tab" class="tab-content">
+                    <div id="pending-sarees-container">
+                        <div style="text-align: center; padding: 4rem;">
+                            <div class="loader" style="margin: 0 auto;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stories-tab" class="tab-content" style="display: none;">
+                    <div id="pending-stories-container">
+                        <div style="text-align: center; padding: 4rem;">
+                            <p style="color: #999;">No stories pending approval</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div id="rejection-modal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-content"
+            style="background: white; padding: 2.5rem; border-radius: 24px; max-width: 500px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.15);">
+            <h2 style="font-family: var(--font-heading); margin-bottom: 1rem; color: var(--color-dark);">Review Feedback
+            </h2>
+            <p style="color: #666; margin-bottom: 1.5rem; font-size: 0.95rem;">Please provide a constructive reason for
+                the artisan to improve their submission.</p>
+            <textarea id="rejection-reason" class="form-input" rows="4"
+                placeholder="e.g., Image clarity needs improvement, please re-upload."
+                style="width: 100%; border-radius: 16px; padding: 1rem; margin-bottom: 1.5rem; border: 1.5px solid #eee;"></textarea>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeRejectionModal()"
+                    style="border-radius: 100px; padding: 0.75rem 1.5rem;">Cancel</button>
+                <button class="btn btn-danger" id="confirm-reject-btn"
+                    style="border-radius: 100px; padding: 0.75rem 1.5rem;">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Preview Modal -->
+    <div id="media-preview-modal"
+        style="display: none; position: fixed; inset: 0; z-index: 2100; background: rgba(0,0,0,0.65); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
+        <div
+            style="background: #111; border-radius: 24px; max-width: 900px; width: 95%; max-height: 90vh; padding: 1.5rem; box-shadow: 0 25px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 1rem; color: #f5f5f5;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                <div>
+                    <h2 id="preview-title"
+                        style="font-family: var(--font-heading); margin: 0; font-size: 1.4rem; color: #fdf5f2;">
+                        Preview
+                    </h2>
+                    <p id="preview-meta" style="margin:0.25rem 0 0; font-size:0.85rem; color:#ccc;"></p>
+                </div>
+                <button onclick="closeMediaPreview()"
+                    style="border:none; background: rgba(255,255,255,0.08); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                    ✕
+                </button>
+            </div>
+            <div
+                style="flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:18px; background:#000;">
+                <img id="preview-image" src="" alt="Preview"
+                    style="max-width:100%; max-height:80vh; object-fit:contain; display:block;">
+                <video id="preview-video" controls
+                    style="max-width:100%; max-height:80vh; display:none; border-radius:18px; outline:none;">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/pages/admin-approvals.js"></script>
+</body>
+
+</html>

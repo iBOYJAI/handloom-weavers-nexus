@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join as Weaver - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-primary);
+            padding: 8rem 2rem;
+            text-align: center;
+            color: var(--color-surface);
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-content {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 2;
+            color: #444;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .step-card {
+            padding: 2rem;
+            background: var(--color-surface);
+            border-radius: 20px;
+        }
+
+        .step-num {
+            font-size: 3rem;
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Become a <em>Partner</em></h1>
+                <p style="font-size: 1.2rem; opacity: 0.9;">Showcase your artistry to the world. Join our artisan
+                    network today.</p>
+                <a href="/pages/register.html" class="btn btn-primary"
+                    style="background: white; color: var(--color-primary); margin-top: 2rem; border-radius: 100px;">Get
+                    Started Now</a>
+            </section>
+
+            <article class="info-content">
+                <h2 style="text-align:center; font-family: var(--font-heading); font-size: 2.5rem;">How it Works</h2>
+
+                <div class="steps">
+                    <div class="step-card">
+                        <div class="step-num">01</div>
+                        <h3>Register</h3>
+                        <p>Create your weaver profile and provide details about your craft and region.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">02</div>
+                        <h3>Upload</h3>
+                        <p>Upload high-quality images and stories of your handloom creations.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">03</div>
+                        <h3>Sell</h3>
+                        <p>Receive orders directly from buyers and ship your authentic products.</p>
+                    </div>
+                </div>
+
+                <h2>Why Join Handloom Nexus?</h2>
+                <ul>
+                    <li><strong>Direct Access:</strong> No middlemen. Reach customers directly.</li>
+                    <li><strong>Storytelling:</strong> Every saree you upload comes with your unique story.</li>
+                    <li><strong>Fair Pricing:</strong> You set the price for your masterwork.</li>
+                    <li><strong>Global Reach:</strong> Your local craft finds an international audience.</li>
+                </ul>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

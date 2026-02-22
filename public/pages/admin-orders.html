@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <h1>Manage Orders</h1>
+            <div id="orders-container"></div>
+        </main>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/admin-utils.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            let allOrders = [];
+
+            async function loadOrders() {
+                const container = document.getElementById('orders-container');
+                container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading...</div>';
+
+                try {
+                    const response = await api.get('/api/admin/orders');
+                    allOrders = response.data || [];
+
+                    if (allOrders.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state" style="text-align: center; padding: 3rem;">
+                                <p style="font-size: 1.2rem; color: var(--color-dark); opacity: 0.7;">No orders found</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    renderOrders(allOrders);
+                } catch (error) {
+                    console.error('Load orders error:', error);
+                    container.innerHTML = `
+                        <div class="empty-state" style="text-align: center; padding: 3rem;">
+                            <p style="font-size: 1.2rem; color: var(--color-light-red); margin-bottom: 1rem;">Error loading orders</p>
+                            <p style="color: var(--color-dark); opacity: 0.6;">${error.message || 'Please try again later'}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            function renderOrders(orders) {
+                const container = document.getElementById('orders-container');
+                const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+
+                container.innerHTML = `
+                    ${adminUtils.createSearchFilterUI([
+                    {
+                        key: 'status',
+                        label: 'Status',
+                        options: [
+                            { value: 'all', label: 'All Status' },
+                            ...statuses.map(s => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))
+                        ]
+                    }
+                ], 'Search orders by buyer name or order ID...')}
+                    ${adminUtils.createBulkSelectUI(false)}
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" class="bulk-select-all" title="Select all">
+                                    </th>
+                                    <th>Order ID</th>
+                                    <th>Buyer</th>
+                                    <th>Items</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${orders.length > 0 ? orders.map(o => `
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="bulk-select-item" data-id="${o.id}">
+                                        </td>
+                                        <td>#${o.id}</td>
+                                        <td>${o.buyer_name || 'N/A'}</td>
+                                        <td>${o.item_count || 0} item(s)</td>
+                                        <td>₹${parseFloat(o.total_amount || 0).toFixed(2)}</td>
+                                        <td><span class="status-badge status-${o.status}">${o.status}</span></td>
+                                        <td>${new Date(o.created_at).toLocaleDateString()}</td>
+                                        <td>
+                                            <select class="form-input" style="width: auto; min-width: 120px;" onchange="updateStatus(${o.id}, this.value)">
+                                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                                <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                                <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="8" style="text-align: center; padding: 2rem;">No orders found</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Initialize search and filter
+                adminUtils.initSearchFilter('orders-container', allOrders, renderOrders, {
+                    searchFields: ['buyer_name', 'id'],
+                    filterTransform: {
+                        status: (value, filter) => filter === 'all' || value === filter
+                    }
+                });
+
+                // Initialize bulk select (no actions for orders, just selection)
+                adminUtils.initBulkSelect('orders-container', {});
+            }
+
+            window.updateStatus = async function (orderId, status) {
+                try {
+                    await api.put(`/api/admin/orders/${orderId}/status`, { status });
+                    notifications.showToast('success', 'Success', 'Order status updated');
+                    await loadOrders();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            await loadOrders();
+        })();
+    </script>
+</body>
+
+</html>

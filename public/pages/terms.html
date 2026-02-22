@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: var(--color-surface);
+            padding: 6rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            color: var(--color-dark);
+            margin-bottom: 1rem;
+        }
+
+        .info-content {
+
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        .info-content h2 {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            margin: 2.5rem 0 1rem;
+        }
+
+        .info-content p {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Terms & <em>Conditions</em></h1>
+                <p
+                    style="color: var(--color-accent); font-weight: 500; letter-spacing: 1px; text-transform: uppercase;">
+                    Last Updated: February 2026</p>
+            </section>
+
+            <article class="info-content">
+                <h2>1. Acceptance of Terms</h2>
+                <p>Welcome to Handloom Nexus. By accessing or using our platform, you agree to comply with and be bound
+                    by these Terms and Conditions. Please read them carefully.</p>
+
+                <h2>2. Marketplace Nature</h2>
+                <p>Handloom Nexus is a platform that connects traditional handloom weavers directly with buyers. We
+                    facilitate transactions but are not the manufacturer of the goods. Each weaver is responsible for
+                    the authenticity and quality of their products.</p>
+
+                <h2>3. User Accounts</h2>
+                <p>To access certain features, you must register for an account. You are responsible for maintaining the
+                    confidentiality of your account information and for all activities that occur under your account.
+                </p>
+
+                <h2>4. Intellectual Property</h2>
+                <p>All content on this site, including designs, text, and images, is the property of Handloom Nexus or
+                    its content suppliers and is protected by international copyright laws.</p>
+
+                <h2>5. Limitation of Liability</h2>
+                <p>Handloom Nexus shall not be liable for any direct, indirect, incidental, or consequential damages
+                    resulting from the use or inability to use our services.</p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

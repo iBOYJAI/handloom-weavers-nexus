@@ -1,0 +1,35 @@
+{
+  "name": "handloom-weavers-nexus",
+  "version": "1.0.0",
+  "description": "Premium offline-first saree marketplace platform connecting handloom weavers with buyers",
+  "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js",
+        "setup-db": "node setup-database.js",
+        "migrate": "node scripts/add-missing-columns.js",
+        "download-images": "node scripts/download-sample-images.js"
+    },
+  "keywords": [
+    "saree",
+    "marketplace",
+    "handloom",
+    "weavers",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5",
+    "express-session": "^1.17.3",
+    "express-mysql-session": "^3.0.1",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
+

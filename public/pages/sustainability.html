@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability - Handloom Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .info-hero {
+            background: #e9f5ef;
+            padding: 8rem 2rem;
+            text-align: center;
+            color: #2D5A27;
+        }
+
+        .info-hero h1 {
+            font-family: var(--font-heading);
+            font-size: 4rem;
+        }
+
+        .info-content {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            line-height: 2;
+            color: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content no-sidebar">
+            <section class="info-hero">
+                <h1>Conscious <em>Couture</em></h1>
+                <p style="font-size: 1.2rem;">Our commitment to ethical fashion and the environment.</p>
+            </section>
+
+            <article class="info-content">
+                <h2>Eco-Friendly by Nature</h2>
+                <p>Handloom is one of the most sustainable forms of textile production. It requires zero electricity,
+                    produces near-zero carbon emissions, and uses natural fibers that are biodegradable. By choosing
+                    handloom, you are actively choosing a lower environmental footprint.</p>
+
+                <h2>Natural Dyes & Fibers</h2>
+                <p>We encourage our weaver partners to use natural, plant-based dyes and organic cotton or silk whenever
+                    possible. This protects both the local water systems and the skin of the wearer.</p>
+
+                <h2>Zero Waste Philosophy</h2>
+                <p>Traditional saree weaving is inherently zero-waste. The rectangular design means no fabric is cut
+                    away, and every inch of the warp and weft is utilized in the final masterpiece.</p>
+            </article>
+
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+        });
+    </script>
+</body>
+
+</html>

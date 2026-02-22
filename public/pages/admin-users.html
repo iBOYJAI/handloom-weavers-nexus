@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .users-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .users-header h1 {
+            margin: 0;
+        }
+
+        .users-filters {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .users-filters input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.6rem 1rem;
+            border: 1.5px solid var(--color-border, #e0d6c8);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+        }
+
+        .users-filters select {
+            padding: 0.6rem 1rem;
+            border: 1.5px solid var(--color-border, #e0d6c8);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .user-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+            border: 1.5px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card:hover {
+            border-color: var(--color-primary, #8B4513);
+            box-shadow: 0 6px 24px rgba(139, 69, 19, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--color-dark);
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-email {
+            font-size: 0.8rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .role-badge.buyer {
+            background: #ebf5fb;
+            color: #2980b9;
+        }
+
+        .role-badge.weaver {
+            background: #fef9e7;
+            color: #d4930a;
+        }
+
+        .role-badge.admin {
+            background: #f9ebea;
+            color: #c0392b;
+        }
+
+        .status-chip {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-chip.approved {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+
+        .status-chip.pending {
+            background: #fdfde7;
+            color: #f39c12;
+        }
+
+        .status-chip.inactive {
+            background: #f8f8f8;
+            color: #999;
+        }
+
+        .user-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+        }
+
+        .user-meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-meta-label {
+            color: #aaa;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .user-meta-value {
+            color: var(--color-dark);
+            font-weight: 500;
+            margin-top: 0.1rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .user-actions button,
+        .user-actions a {
+            flex: 1;
+            min-width: 80px;
+            padding: 0.45rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-approve {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #219653;
+        }
+
+        .btn-suspend {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-suspend:hover {
+            background: #c0392b;
+        }
+
+        .btn-restore {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-restore:hover {
+            background: #d68910;
+        }
+
+        .btn-delete {
+            background: #fff0f0;
+            color: #e74c3c;
+            border: 1px solid #fcc;
+        }
+
+        .btn-delete:hover {
+            background: #fde;
+        }
+
+        .user-count-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .count-chip {
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .no-users {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #888;
+            grid-column: 1 / -1;
+        }
+
+        .no-users p {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content" style="padding: 2rem;">
+            <div class="users-header">
+                <h1 style="font-family: var(--font-heading); color: var(--color-dark);">Manage Users</h1>
+                <div id="users-stats" style="display:flex;gap:0.5rem;flex-wrap:wrap;"></div>
+            </div>
+
+            <div class="users-filters">
+                <input type="text" id="user-search" placeholder="Search by name or email..." oninput="filterUsers()">
+                <select id="role-filter" onchange="filterUsers()">
+                    <option value="all">All Roles</option>
+                    <option value="buyer">Buyers</option>
+                    <option value="weaver">Weavers</option>
+                    <option value="admin">Admins</option>
+                </select>
+                <select id="status-filter" onchange="filterUsers()">
+                    <option value="all">All Status</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div id="users-container">
+                <div style="text-align:center;padding:3rem;color:#888;">Loading users...</div>
+            </div>
+        </main>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        let allUsers = [];
+
+        const AVATAR_COLORS = ['#8B4513', '#D4930A', '#2ecc71', '#3498db', '#9b59b6', '#e67e22', '#16a085', '#d35400', '#8e44ad'];
+        function getAvatarColor(name) {
+            let hash = 0;
+            for (let c of name || '') hash = (hash * 31 + c.charCodeAt(0)) & 0xffffffff;
+            return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+        }
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(' ');
+            return parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.slice(0, 2).toUpperCase();
+        }
+
+        function renderUsers(users) {
+            const container = document.getElementById('users-container');
+            if (users.length === 0) {
+                container.innerHTML = '<div class="users-grid"><div class="no-users"><p>No users found matching your filters</p></div></div>';
+                return;
+            }
+
+            const html = users.map(u => {
+                const initials = getInitials(u.name);
+                const color = getAvatarColor(u.name);
+                const roleClass = u.role || 'buyer';
+                let statusLabel, statusClass;
+                if (!u.is_active) { statusLabel = 'Inactive'; statusClass = 'inactive'; }
+                else if (u.is_approved) { statusLabel = 'Approved'; statusClass = 'approved'; }
+                else { statusLabel = 'Pending'; statusClass = 'pending'; }
+
+                const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+
+                return `
+                <div class="user-card">
+                    <div class="user-card-header">
+                        ${u.avatar ? `<img src="${u.avatar}" alt="${u.name}" class="user-avatar" onerror="this.outerHTML='<div class=\\'user-avatar\\' style=\\'background:${color}\\'>${initials}</div>'">` :
+                        `<div class="user-avatar" style="background:${color}">${initials}</div>`}
+                        <div class="user-info">
+                            <div class="user-name" title="${u.name || ''}">${u.name || 'Unknown'}</div>
+                            <div class="user-email" title="${u.email || ''}">${u.email || ''}</div>
+                        </div>
+                    </div>
+                    <div class="user-badges">
+                        <span class="role-badge ${roleClass}">${u.role || 'buyer'}</span>
+                        <span class="status-chip ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="user-meta">
+                        <div class="user-meta-item">
+                            <span class="user-meta-label">Region</span>
+                            <span class="user-meta-value">${u.region || '—'}</span>
+                        </div>
+                        <div class="user-meta-item">
+                            <span class="user-meta-label">Phone</span>
+                            <span class="user-meta-value">${u.phone || '—'}</span>
+                        </div>
+                        <div class="user-meta-item">
+                            <span class="user-meta-label">Joined</span>
+                            <span class="user-meta-value">${joined}</span>
+                        </div>
+                        <div class="user-meta-item">
+                            <span class="user-meta-label">ID</span>
+                            <span class="user-meta-value">#${u.id}</span>
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        ${!u.is_approved && u.role === 'weaver' ? `<button class="btn-approve" onclick="approveUser(${u.id})">Approve</button>` : ''}
+                        ${u.is_active ? `<button class="btn-suspend" onclick="suspendUser(${u.id})">Suspend</button>` : `<button class="btn-restore" onclick="restoreUser(${u.id})">Restore</button>`}
+                        <button class="btn-delete" onclick="deleteUser(${u.id}, '${(u.name || '').replace(/'/g, "\\'")}')">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            container.innerHTML = `<div class="users-grid">${html}</div>`;
+        }
+
+        function filterUsers() {
+            const q = document.getElementById('user-search').value.toLowerCase();
+            const role = document.getElementById('role-filter').value;
+            const status = document.getElementById('status-filter').value;
+            const filtered = allUsers.filter(u => {
+                const matchQ = !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+                const matchRole = role === 'all' || u.role === role;
+                let matchStatus = true;
+                if (status === 'approved') matchStatus = u.is_approved && u.is_active;
+                else if (status === 'pending') matchStatus = !u.is_approved && u.is_active;
+                else if (status === 'inactive') matchStatus = !u.is_active;
+                return matchQ && matchRole && matchStatus;
+            });
+            renderUsers(filtered);
+        }
+
+        async function loadUsers() {
+            try {
+                const resp = await api.get('/api/admin/users');
+                allUsers = resp.data || [];
+
+                // Update stats chips
+                const buyers = allUsers.filter(u => u.role === 'buyer').length;
+                const weavers = allUsers.filter(u => u.role === 'weaver').length;
+                const admins = allUsers.filter(u => u.role === 'admin').length;
+                const pending = allUsers.filter(u => !u.is_approved && u.role === 'weaver').length;
+                document.getElementById('users-stats').innerHTML = `
+                    <span class="count-chip" style="background:#ebf5fb;color:#2980b9;">${buyers} Buyers</span>
+                    <span class="count-chip" style="background:#fef9e7;color:#d4930a;">${weavers} Weavers</span>
+                    <span class="count-chip" style="background:#f9ebea;color:#c0392b;">${admins} Admins</span>
+                    ${pending > 0 ? `<span class="count-chip" style="background:#fff8e1;color:#e67e22;">${pending} Pending Approval</span>` : ''}
+                `;
+                renderUsers(allUsers);
+            } catch (err) {
+                document.getElementById('users-container').innerHTML = `<div style="text-align:center;padding:3rem;color:#e74c3c;">Error loading users: ${err.message}</div>`;
+            }
+        }
+
+        window.approveUser = async function (id) {
+            try {
+                await api.put(`/api/admin/users/${id}/approve`);
+                notifications.showToast('success', 'Approved', 'User approved successfully');
+                await loadUsers();
+            } catch (e) { notifications.showToast('error', 'Error', e.message); }
+        };
+        window.suspendUser = async function (id) {
+            if (!confirm('Suspend this user?')) return;
+            try {
+                await api.put(`/api/admin/users/${id}/deactivate`);
+                notifications.showToast('success', 'Suspended', 'User suspended');
+                await loadUsers();
+            } catch (e) { notifications.showToast('error', 'Error', e.message); }
+        };
+        window.restoreUser = async function (id) {
+            try {
+                await api.put(`/api/admin/users/${id}/activate`);
+                notifications.showToast('success', 'Restored', 'User restored');
+                await loadUsers();
+            } catch (e) { notifications.showToast('error', 'Error', e.message); }
+        };
+        window.deleteUser = async function (id, name) {
+            if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+            try {
+                await api.delete(`/api/admin/users/${id}`);
+                notifications.showToast('success', 'Deleted', 'User deleted');
+                await loadUsers();
+            } catch (e) { notifications.showToast('error', 'Error', e.message); }
+        };
+
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            await loadUsers();
+        })();
+    </script>
+</body>
+
+</html>

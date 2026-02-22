@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Saree - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="padding: 2rem 1rem;">
+                <div style="margin-bottom: 3rem;">
+                    <h1
+                        style="font-family: var(--font-heading); font-size: 3.5rem; margin: 0; color: var(--color-dark); letter-spacing: -2px;">
+                        New Showcase</h1>
+                    <p style="color: #888; font-size: 1.1rem; margin-top: 0.5rem;">Introduce your latest masterpiece to
+                        the world.</p>
+                </div>
+
+                <div class="glass-card" style="background: white; padding: 3rem; max-width: 900px; margin: 0 auto;">
+                    <form id="upload-form" enctype="multipart/form-data">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="title"
+                                    style="font-weight: 700; color: var(--color-dark);">Saree Title</label>
+                                <input type="text" id="title" class="form-input" required minlength="5" maxlength="100"
+                                    placeholder="e.g. Royal Kancheepuram Silk"
+                                    style="border-radius: 12px; padding: 0.9rem;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="category"
+                                    style="font-weight: 700; color: var(--color-dark);">Category</label>
+                                <select id="category" class="form-input" required
+                                    style="border-radius: 12px; padding: 0.9rem;"></select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label class="form-label" for="description"
+                                style="font-weight: 700; color: var(--color-dark);">The Story (Description)</label>
+                            <textarea id="description" class="form-input" rows="4" required minlength="20"
+                                maxlength="1000" placeholder="Describe the weave, the thread, and the inspiration..."
+                                style="border-radius: 12px; padding: 1rem;"></textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="price"
+                                    style="font-weight: 700; color: var(--color-dark);">Price (₹)</label>
+                                <input type="number" id="price" class="form-input" required min="1" max="999999"
+                                    step="0.01" style="border-radius: 12px; padding: 0.9rem;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="stock"
+                                    style="font-weight: 700; color: var(--color-dark);">Stock Quantity</label>
+                                <input type="number" id="stock" class="form-input" required min="0" max="9999"
+                                    style="border-radius: 12px; padding: 0.9rem;">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem;">
+                            <label class="form-label" style="font-weight: 700; color: var(--color-dark);">Master Blouse
+                                Colors</label>
+                            <div id="blouse-colors-container"
+                                style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem;">
+                                <!-- Colors added here -->
+                            </div>
+                            <button type="button" id="add-blouse-color-btn" class="btn btn-secondary"
+                                style="margin-top: 1rem; border-radius: var(--radius-full); padding: 0.5rem 1.5rem; font-size: 0.85rem;">+
+                                Add Color Palette</button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 700; color: var(--color-dark);">Product
+                                    Images (Up to 5)</label>
+                                <label for="images" class="file-upload file-upload-clickable file-upload-zone"
+                                    style="border-radius: 16px; border-style: solid; border-width: 1.5px; background: #fafafa;">
+                                    <input type="file" id="images" name="images"
+                                        accept="image/jpeg,image/png,image/webp" multiple>
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📸</div>
+                                    <span class="file-upload-label" style="font-size: 0.85rem; color: #888;">Select
+                                        high-quality photos</span>
+                                </label>
+                                <div class="file-preview" id="image-preview" style="margin-top: 1rem;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="video_url"
+                                    style="font-weight: 700; color: var(--color-dark);">Video Showcase
+                                    (Optional)</label>
+                                <div style="position: relative;">
+                                    <input type="url" id="video_url" class="form-input"
+                                        placeholder="Paste YouTube/Vimeo/Cloudinary Link"
+                                        style="border-radius: 12px; padding: 3.5rem 1rem 1rem 1rem; height: 120px;">
+                                    <div style="position: absolute; top: 1rem; left: 1rem; font-size: 1.5rem;">🎥</div>
+                                </div>
+                                <small style="display: block; margin-top: 0.5rem; color: #999;">A short video of the
+                                    drape helps buyers decide faster.</small>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #f0f0f0;">
+                            <button type="submit" class="btn btn-primary"
+                                style="width: 100%; height: 60px; border-radius: 16px; font-size: 1.25rem; font-weight: 700; box-shadow: 0 15px 30px rgba(192, 57, 43, 0.2);">
+                                Publish Masterpiece
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div id="footer-placeholder" style="margin-top: 4rem;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            // Load categories
+            try {
+                const catRes = await api.get('/api/categories');
+                const categories = catRes.data || [];
+                const catSelect = document.getElementById('category');
+                catSelect.innerHTML = '<option value="">Select style</option>' + categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+            } catch (e) { }
+
+            const blouseColorsContainer = document.getElementById('blouse-colors-container');
+            function addBlouseColorInput(color = '#C0392B') {
+                const div = document.createElement('div');
+                div.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 10px; border: 1px solid #eee;';
+                div.innerHTML = `
+                    <input type="color" value="${color}" style="width: 32px; height: 32px; cursor: pointer; border: none; background:none;">
+                    <span style="font-weight: 700; min-width: 60px; font-size: 0.8rem;">${color}</span>
+                    <button type="button" style="background: none; border: none; color: #999; cursor: pointer; font-size: 1rem; padding: 0 4px;">×</button>
+                `;
+                const colorInput = div.querySelector('input');
+                const colorText = div.querySelector('span');
+                colorInput.addEventListener('input', () => colorText.textContent = colorInput.value.toUpperCase());
+                div.querySelector('button').addEventListener('click', () => div.remove());
+                blouseColorsContainer.appendChild(div);
+            }
+
+            document.getElementById('add-blouse-color-btn').addEventListener('click', () => addBlouseColorInput());
+            addBlouseColorInput('#C0392B'); // Standard maroon
+
+            // Image handling
+            document.getElementById('images').addEventListener('change', function (e) {
+                const preview = document.getElementById('image-preview');
+                preview.innerHTML = '';
+                Array.from(e.target.files).slice(0, 5).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'position: relative; border-radius: 12px; overflow: hidden; height: 80px;';
+                        div.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            document.getElementById('upload-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const colors = Array.from(document.querySelectorAll('#blouse-colors-container input[type="color"]')).map(i => i.value);
+                const formData = new FormData();
+                formData.append('title', document.getElementById('title').value);
+                formData.append('categoryId', document.getElementById('category').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('price', document.getElementById('price').value);
+                formData.append('stock', document.getElementById('stock').value);
+                formData.append('video_url', document.getElementById('video_url').value);
+                formData.append('blouseColors', JSON.stringify(colors));
+
+                const files = document.getElementById('images').files;
+                Array.from(files).slice(0, 5).forEach(f => formData.append('images', f));
+
+                try {
+                    const res = await api.upload('/api/weaver/sarees', formData);
+                    if (res.success) {
+                        notifications.showToast('success', 'Masterpiece Published', 'Awaiting administrative approval.');
+                        setTimeout(() => window.location.href = '/pages/weaver-dashboard.html', 2000);
+                    }
+                } catch (error) {
+                    notifications.showToast('error', 'Upload Interrupted', error.message);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

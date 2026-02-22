@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="">
+                <div style="margin-bottom: 2.5rem;">
+                    <h1
+                        style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--color-dark); margin-bottom: 0.5rem;">
+                        Checkout</h1>
+                    <p style="color: #666; font-size: 1.1rem;">Complete your order and support India's heritage.</p>
+                </div>
+
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; align-items: start;">
+                    <div class="card"
+                        style="padding: 2.5rem; border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); border-radius: var(--radius-lg); background: #fff;">
+                        <h2
+                            style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--color-dark);">
+                            Delivery Details</h2>
+                        <form id="checkout-form">
+                            <div class="form-group">
+                                <label class="form-label" for="address">Full Delivery Address</label>
+                                <textarea id="address" class="form-input" rows="4" required minlength="10"
+                                    placeholder="Enter your full street address, landmark, city, and pincode..."
+                                    style="background: #fbfbfb;"></textarea>
+                                <span class="form-help">Ensure your address is accurate for timely delivery.</span>
+                            </div>
+                            <div style="margin-top: 2rem;">
+                                <button type="submit" class="btn btn-primary btn-lg"
+                                    style="width: 100%; border-radius: 100px; padding: 1rem; font-weight: 700; box-shadow: 0 4px 15px rgba(192, 57, 43, 0.2);">Place
+                                    Order (Cash on Delivery)</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="order-summary-container">
+                        <div class="card"
+                            style="padding: 2rem; border: 1px solid var(--color-border); background: var(--color-cream); border-radius: var(--radius-lg);">
+                            <h2 style="font-family: var(--font-heading); font-size: 1.25rem; margin-bottom: 1rem;">Order
+                                Summary</h2>
+                            <div id="order-summary">
+                                <!-- Injected by JS -->
+                                <p style="color: #999;">Loading summary...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="footer-placeholder" style="margin-top: 4rem;"></div>
+            </div>
+        </main>
+
+        <script src="/js/api.js"></script>
+        <script src="/js/auth.js"></script>
+        <script src="/js/components.js"></script>
+        <script src="/js/notifications.js"></script>
+        <script src="/js/pages/checkout.js"></script>
+</body>
+
+</html>

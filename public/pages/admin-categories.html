@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <h1>Manage Categories</h1>
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h2 class="form-section-title">Add New Category</h2>
+                <form id="add-category-form">
+                    <div class="form-group">
+                        <label class="form-label" for="category-name">Category Name</label>
+                        <input type="text" id="category-name" class="form-input" required minlength="2" maxlength="100">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </form>
+            </div>
+            <div id="categories-container"></div>
+        </main>
+    </div>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/admin-utils.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'admin') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            let allCategories = [];
+
+            async function loadCategories() {
+                const container = document.getElementById('categories-container');
+                container.innerHTML = '<div style="text-align: center; padding: 2rem;">Loading...</div>';
+
+                try {
+                    const response = await api.get('/api/admin/categories');
+                    allCategories = response.data || [];
+
+                    if (allCategories.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state" style="text-align: center; padding: 3rem;">
+                                <p style="font-size: 1.2rem; color: var(--color-dark); opacity: 0.7;">No categories found</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    renderCategories(allCategories);
+                } catch (error) {
+                    console.error('Load categories error:', error);
+                    container.innerHTML = `
+                        <div class="empty-state" style="text-align: center; padding: 3rem;">
+                            <p style="font-size: 1.2rem; color: var(--color-light-red); margin-bottom: 1rem;">Error loading categories</p>
+                            <p style="color: var(--color-dark); opacity: 0.6;">${error.message || 'Please try again later'}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            function renderCategories(categories) {
+                const container = document.getElementById('categories-container');
+
+                container.innerHTML = `
+                    ${adminUtils.createSearchFilterUI([], 'Search categories by name...')}
+                    ${adminUtils.createBulkSelectUI(true)}
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" class="bulk-select-all" title="Select all">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${categories.length > 0 ? categories.map(cat => `
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="bulk-select-item" data-id="${cat.id}">
+                                        </td>
+                                        <td>${cat.id}</td>
+                                        <td><input type="text" value="${cat.name}" id="cat-name-${cat.id}" class="form-input" style="width: 100%;"></td>
+                                        <td>${cat.slug}</td>
+                                        <td>
+                                            <div style="display: flex; gap: 0.5rem;">
+                                                <button class="btn btn-primary btn-sm" onclick="updateCategory(${cat.id})">Update</button>
+                                                <button class="btn btn-danger btn-sm" onclick="deleteCategory(${cat.id})">Delete</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No categories found</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Initialize search and filter
+                adminUtils.initSearchFilter('categories-container', allCategories, renderCategories, {
+                    searchFields: ['name', 'slug']
+                });
+
+                // Initialize bulk select
+                adminUtils.initBulkSelect('categories-container', {
+                    bulkActions: {
+                        delete: async (ids) => {
+                            if (!confirm(`Delete ${ids.length} selected category/categories?`)) return;
+                            try {
+                                for (const id of ids) {
+                                    // Note: Delete endpoint might not exist, handle gracefully
+                                    notifications.showToast('info', 'Info', 'Bulk delete for categories coming soon');
+                                }
+                            } catch (error) {
+                                notifications.showToast('error', 'Error', error.message);
+                            }
+                        },
+                        edit: async (ids) => {
+                            if (ids.length === 1) {
+                                updateCategory(ids[0]);
+                            } else {
+                                notifications.showToast('info', 'Info', 'Please select one category to edit');
+                            }
+                        }
+                    }
+                });
+            }
+
+            window.deleteCategory = async function (categoryId) {
+                if (!confirm('Delete this category? This action cannot be undone.')) return;
+                try {
+                    notifications.showToast('info', 'Info', 'Delete category feature coming soon');
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            document.getElementById('add-category-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('category-name').value.trim();
+                try {
+                    await api.post('/api/admin/categories', { name });
+                    notifications.showToast('success', 'Success', 'Category added');
+                    document.getElementById('category-name').value = '';
+                    await loadCategories();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            });
+
+            window.updateCategory = async function (categoryId) {
+                const name = document.getElementById(`cat-name-${categoryId}`).value.trim();
+                try {
+                    await api.put(`/api/admin/categories/${categoryId}`, { name });
+                    notifications.showToast('success', 'Success', 'Category updated');
+                    await loadCategories();
+                } catch (error) {
+                    notifications.showToast('error', 'Error', error.message);
+                }
+            };
+
+            await loadCategories();
+        })();
+    </script>
+</body>
+
+</html>

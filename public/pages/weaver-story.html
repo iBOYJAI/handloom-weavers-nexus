@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Story - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .premium-hero {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 4rem 2rem;
+            border-radius: 24px;
+            margin-bottom: 3rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .story-upload-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .story-upload-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-form-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--color-dark);
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .form-input-premium {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input-premium:focus {
+            border-color: var(--color-accent);
+            outline: none;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+        }
+
+        .preview-sticky {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .preview-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .preview-media-container {
+            width: 100%;
+            height: 300px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-media-container img,
+        .preview-media-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-content {
+            padding: 1.5rem;
+        }
+
+        .preview-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: var(--color-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-caption {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .preview-description {
+            font-size: 0.95rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .file-upload-zone {
+            border: 2px dashed #ddd;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            margin-bottom: 2rem;
+        }
+
+        .file-upload-zone:hover {
+            border-color: var(--color-accent);
+            background: #fffdf5;
+        }
+
+        .btn-upload {
+            background: var(--color-dark);
+            color: white;
+            padding: 1.25rem 3rem;
+            border-radius: 100px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container" style="max-width: 1300px; padding: 2rem 1rem;">
+
+                <div class="premium-hero">
+                    <div style="position: relative; z-index: 2;">
+                        <h1
+                            style="font-family: var(--font-heading); font-size: 3.5rem; margin-bottom: 0.5rem; color: #fff3e0;">
+                            Share Your <em>Journey</em></h1>
+                        <p style="font-size: 1.2rem; opacity: 0.9;">Bridge the distance between your loom and their home
+                            with an authentic artisan story.</p>
+                    </div>
+                </div>
+
+                <div class="story-upload-grid">
+                    <!-- Form Section -->
+                    <div class="glass-form-card">
+                        <form id="story-form">
+                            <div class="form-group">
+                                <label class="form-label">Story Title</label>
+                                <input type="text" id="title" class="form-input-premium"
+                                    placeholder="e.g. The Legacy of Kanchipuram Gold" required>
+                                <span
+                                    style="display: block; font-size: 0.8rem; color: #888; margin-top: -1rem; margin-bottom: 1.5rem;">Think
+                                    of a captivating headline for your story.</span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Short Caption</label>
+                                <input type="text" id="caption" class="form-input-premium"
+                                    placeholder="A short, catchy hook for the gallery card..." maxlength="150" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">The Full Story (Description)</label>
+                                <textarea id="description" class="form-input-premium" rows="8"
+                                    placeholder="Share the heritage, the technique, and the soul of your craft..."
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Visual Media</label>
+                                <label for="media" class="file-upload-zone">
+                                    <input type="file" id="media" name="media" accept="image/*,video/*" multiple
+                                        style="display: none;">
+                                    <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
+                                    <h3 style="margin-bottom: 0.5rem;">Click to upload images/videos</h3>
+                                    <p style="color: #888;">Add up to 5 files. Max size: 50MB for video, 5MB for images.
+                                    </p>
+                                </label>
+                                <div id="media-grid"
+                                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.75rem; margin-bottom: 2rem;">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-upload">Publish Your Story</button>
+                        </form>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div class="preview-sticky">
+                        <div
+                            style="text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; font-weight: 700; color: #888; margin-bottom: 1rem; text-align: center;">
+                            Live Preview</div>
+                        <div class="preview-card" id="story-preview-card">
+                            <div class="preview-media-container" id="preview-media">
+                                <span style="color: #ccc;">No Media Uploaded</span>
+                            </div>
+                            <div class="preview-content">
+                                <div id="preview-title-val" class="preview-title">Story Title Here</div>
+                                <div id="preview-caption-val" class="preview-caption">Your hook will appear here...
+                                </div>
+                                <div id="preview-desc-val" class="preview-description">Your deep storytelling will be
+                                    visible on the full-page view once buyers click your card...</div>
+                            </div>
+                        </div>
+                        <p
+                            style="text-align: center; color: #999; font-size: 0.85rem; margin-top: 1.5rem; line-height: 1.5;">
+                            Stories undergo moderation to ensure authentic heritage representation. Approved stories
+                            appear in the global gallery.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="footer-placeholder"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+
+            await components.injectHeader();
+            await components.injectSidebar();
+            components.injectFooter();
+
+            const form = document.getElementById('story-form');
+            const titleInput = document.getElementById('title');
+            const captionInput = document.getElementById('caption');
+            const descInput = document.getElementById('description');
+            const mediaInput = document.getElementById('media');
+
+            // Live Preview Logic
+            const updatePreview = () => {
+                document.getElementById('preview-title-val').textContent = titleInput.value || 'Story Title Here';
+                document.getElementById('preview-caption-val').textContent = captionInput.value || 'Your hook will appear here...';
+
+                const descVal = descInput.value || 'Your deep storytelling will be visible on the full-page view...';
+                document.getElementById('preview-desc-val').textContent = descVal.length > 150 ? descVal.substring(0, 150) + '...' : descVal;
+            };
+
+            [titleInput, captionInput, descInput].forEach(el => el.addEventListener('input', updatePreview));
+
+            mediaInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files).slice(0, 5);
+                const mediaGrid = document.getElementById('media-grid');
+                mediaGrid.innerHTML = '';
+
+                if (files.length > 0) {
+                    const firstFile = files[0];
+                    const previewMedia = document.getElementById('preview-media');
+                    const url = URL.createObjectURL(firstFile);
+
+                    if (firstFile.type.startsWith('video/')) {
+                        previewMedia.innerHTML = `<video src="${url}" autoplay muted loop></video>`;
+                    } else {
+                        previewMedia.innerHTML = `<img src="${url}">`;
+                    }
+
+                    files.forEach(file => {
+                        const img = document.createElement('div');
+                        img.style.width = '100%';
+                        img.style.height = '80px';
+                        img.style.borderRadius = '8px';
+                        img.style.background = '#eee';
+                        img.style.backgroundSize = 'cover';
+                        img.style.backgroundPosition = 'center';
+
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => img.style.backgroundImage = `url(${ev.target.result})`;
+                            reader.readAsDataURL(file);
+                        } else {
+                            img.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.5rem;">📽️</div>';
+                        }
+                        mediaGrid.appendChild(img);
+                    });
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append('title', titleInput.value);
+                formData.append('caption', captionInput.value);
+                formData.append('description', descInput.value);
+
+                const files = mediaInput.files;
+                if (files.length === 0) {
+                    notifications.showToast('error', 'Missing Media', 'Please upload at least one image or video.');
+                    return;
+                }
+
+                Array.from(files).slice(0, 5).forEach(file => {
+                    formData.append('media', file);
+                });
+
+                try {
+                    notifications.showToast('info', 'Uploading...', 'Sharing your craft with the world.');
+                    const response = await api.upload('/api/weaver/stories', formData);
+                    if (response.success) {
+                        notifications.showToast('success', 'Story Published!', 'Your story has been submitted for moderation.');
+                        setTimeout(() => window.location.href = '/pages/weaver-manage-stories.html', 1500);
+                    }
+                } catch (error) {
+                    notifications.showToast('error', 'Upload Failed', error.message || 'Something went wrong.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

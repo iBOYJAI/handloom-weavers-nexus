@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Approval - Handloom Weavers Nexus</title>
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/pages.css">
+    <style>
+        .pending-container {
+            max-width: 500px;
+            margin: 4rem auto;
+            padding: 3rem;
+            text-align: center;
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .pending-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .pending-title {
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--color-dark);
+        }
+
+        .pending-message {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <div id="header-placeholder"></div>
+        <div id="sidebar-placeholder"></div>
+        <main class="main-content">
+            <div class="container"
+                style="padding: 4rem 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh;">
+                <div class="pending-container" style="margin: 0; width: 100%;">
+                    <div class="pending-icon">⏳</div>
+                    <h1 class="pending-title">Account Under Review</h1>
+                    <p class="pending-message">Your weaver account is currently being reviewed by our administration
+                        team. We'll notify you as soon as your account is approved. In the meantime, you can explore the
+                        marketplace as a buyer.</p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="/pages/buyer-home.html" class="btn btn-primary"
+                            style="padding: 0.75rem 2rem; border-radius: var(--radius-full);">Browse Marketplace</a>
+                        <a href="#" id="logout-link" class="btn btn-secondary"
+                            style="padding: 0.75rem 2rem; border-radius: var(--radius-full);">Logout</a>
+                    </div>
+                </div>
+            </div>
+            <div id="footer-placeholder"></div>
+        </main>
+    </div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/components.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script>
+        (async function () {
+            const user = await auth.checkAuth();
+            if (!user || user.role !== 'weaver') {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            if (user.isApproved) {
+                window.location.href = '/pages/weaver-dashboard.html';
+                return;
+            }
+            document.getElementById('logout-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                auth.handleLogout();
+            });
+        })();
+    </script>
+</body>
+
+</html>
