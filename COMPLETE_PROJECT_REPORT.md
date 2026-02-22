@@ -248,8 +248,16 @@ Routes act as the entry point for all HTTP requests, directing incoming traffic 
 
 Data Flow Diagrams are essential for visualizing how information transforms as it moves through the Handloom Weavers Nexus ecosystem.
 
+**Diagram conventions (white and black theme):** All DFDs use a **white background** with **black lines and black text**. Symbols are as follows:
+- **External Entity** — rectangle/square
+- **System Process** — circle
+- **Datastore (data table)** — open-sided box (top, bottom, and left sides drawn; **right side open**)
+- **Data flow** — solid arrow; **control/feedback** — dashed arrow (where used)
+
+*For exact rendering with these symbols, see the file `docs/diagrams-dfd-er.html` in the project repository (open in a browser).*
+
 #### DFD Level 0 (Context Level):
-The Context Diagram defines the interaction between the system and its external environment.
+The Context Diagram defines the interaction between the system and its external environment. **External entities** (rectangles): Buyer/Visitor, Weaver, Admin. **Central process** (circle): Handloom Weavers Nexus.
 ```mermaid
 graph LR
     User[Buyer/Visitor] -->|Authentication Requests| System((Handloom Weavers Nexus))
@@ -262,13 +270,13 @@ graph LR
 ```
 
 #### DFD Level 1 (Process Breakdown):
-This level decomposes the system into its primary subsystems:
-1. **P1: Authentication Subsystem**: Validates credentials and manages session state.
-2. **P2: Inventory Subsystem**: Handles the lifecycle of Saree listings (sarees, images, variants) from upload to sale.
-3. **P3: Story Subsystem**: A dedicated pipeline for multi-media artisan narratives (weaver_stories).
-4. **P4: Governance Subsystem**: Enables admins to audit, approve, or reject content (saree_approvals, story_approvals).
-5. **P5: Transaction Subsystem**: Manages the cart, orders, and final checkout sequences.
-6. **P6: Wishlist & Reviews Subsystem**: Manages wishlist entries and buyer reviews for sarees.
+This level decomposes the system into its primary subsystems. **Processes** (circles) and **datastores** (open-sided boxes, right open) interact as below. External entities (rectangles) feed and receive data.
+1. **P1: Authentication Subsystem** — Validates credentials and manages session state; datastore: User table / Sessions.
+2. **P2: Inventory Subsystem** — Handles saree listings (sarees, images, variants) from upload to sale; datastores: sarees, saree_images, saree_variants.
+3. **P3: Story Subsystem** — Multi-media weaver narratives; datastore: weaver_stories.
+4. **P4: Governance Subsystem** — Admin audit, approve/reject content; datastores: saree_approvals, story_approvals.
+5. **P5: Transaction Subsystem** — Cart, orders, checkout; datastores: cart_items, orders, order_items.
+6. **P6: Wishlist & Reviews Subsystem** — Wishlist and buyer reviews; datastores: wishlist, reviews.
 
 #### DFD Level 2 (Order Fulfillment Detail):
 Captures the granular logic required to process a sale securely.
@@ -321,11 +329,13 @@ graph TD
 
 ### 3.3 E-R DIAGRAM (Chen Notation)
 
-The Entity-Relationship Diagram represents the logical blueprint of our database. In **Chen Notation**:
-- **Entity**: Rectangle
-- **Relationship**: Diamond
-- **Attribute**: Oval
-- **Key Attribute**: Oval with underline (shown as "PK" in labels below)
+The Entity-Relationship Diagram represents the logical blueprint of our database. **Diagram conventions (white and black theme):** White background, black lines and text. **Chen Notation**:
+- **Entity** — rectangle
+- **Relationship** — diamond
+- **Attribute** — oval
+- **Key attribute** — oval with underline (in table below, PK is indicated)
+
+*For exact Chen-style rendering (rectangles, diamonds, ovals), see `docs/diagrams-dfd-er.html`.*
 
 ```mermaid
 flowchart LR
@@ -597,7 +607,81 @@ This section details the physical design of the database, ensuring ACIDity (Atom
 
 ### 3.5 MODULE SPECIFICATION
 
-The software is built on a **Modular Engine** philosophy. Each module is self-contained, with clear boundaries and well-defined interfaces, yet communicates via shared session, routes, and data models. Below, every core module is fully defined and explained.
+The software is built on a **Modular Engine** philosophy. Each module is self-contained, with clear boundaries and well-defined interfaces, yet communicates via shared session, routes, and data models.
+
+---
+
+#### 3.5.1 MODULES OVERVIEW (Role-Based)
+
+| # | Module | Description |
+| :---: | :--- | :--- |
+| 1 | **Admin Module** | Platform governance, user management, content approvals |
+| 2 | **Weaver Module** | Product catalogue, stories, orders, and sales management |
+| 3 | **Buyer Module** | Browsing, cart, orders, wishlist, and checkout |
+
+---
+
+#### 3.5.2 MODULE SPECIFICATIONS (Role-Wise)
+
+**1. ADMIN MODULE**
+
+| # | Sub-Module | Description |
+| :---: | :--- | :--- |
+| 1 | REGISTER | To be authenticated first, must be registered |
+| 2 | LOGIN | The registered user can access inner details for which he is permitted |
+| 3 | BUYER DETAILS | User can modify the status of each buyer (suspend, reactivate) |
+| 4 | WEAVER DETAILS | According to role, admin can add or approve/reject weavers for the platform |
+
+- **REGISTER:** To be authenticated first, one has to be registered.
+- **LOGIN:** The registered user can be allowed to view inner details for which he is permitted.
+- **BUYER DETAILS:** Admin can modify buyer status (suspend/reactivate) and manage user accounts.
+- **WEAVER DETAILS:** Admin can approve or reject weaver registrations and manage weaver accounts for the platform.
+
+---
+
+**2. WEAVER MODULE**
+
+| # | Sub-Module | Description |
+| :---: | :--- | :--- |
+| 1 | REGISTER | To be authenticated first, must be registered |
+| 2 | LOGIN | The registered user can access inner details for which he is permitted |
+| 3 | ADD SAREE | According to flow and category, weaver can add sarees into the database |
+| 4 | UPDATE SAREE | If any corrections in product data, weaver can modify the saree |
+| 5 | CREATE STORY | Weaver can create artisan stories with media (images/videos) |
+| 6 | VIEW ORDER DETAILS | Can view number of registered orders and attended/fulfilled orders |
+| 7 | SALES REPORT | Evaluation of performance based on his sales, revenue, and top-selling sarees |
+
+- **REGISTER:** To be authenticated first, one has to be registered.
+- **LOGIN:** The registered user can be allowed to view inner details for which he is permitted.
+- **ADD SAREE:** According to flow of products and category, weaver can add sarees into the database.
+- **UPDATE SAREE:** If any corrections in data of sarees, weaver can modify the product.
+- **CREATE STORY:** Weaver prepares and uploads artisan stories with media (images/videos).
+- **VIEW ORDER DETAILS:** Can view orders received and their fulfillment status.
+- **SALES REPORT:** Evaluation of performance based on his uploads and sales analytics.
+
+---
+
+**3. BUYER MODULE**
+
+| # | Sub-Module | Description |
+| :---: | :--- | :--- |
+| 1 | REGISTER | To be authenticated first, must be registered |
+| 2 | LOGIN | The registered user can access inner details for which he is permitted |
+| 3 | BROWSE & PURCHASE | Browse sarees, add to cart, and place orders |
+| 4 | SEE ORDER RESULTS | After completion of order, user can view order history and status |
+| 5 | LOGOUT | After the process of shopping, user returns to logout page |
+
+- **REGISTER:** To be authenticated first, one has to be registered.
+- **LOGIN:** The registered user can be allowed to view inner details for which he is permitted.
+- **BROWSE & PURCHASE:** The registered buyer is allowed to browse sarees and complete purchases.
+- **SEE ORDER RESULTS:** After completion of order, buyer can view his order history and status.
+- **LOGOUT:** After the process of shopping or browsing, user navigates to the logout page.
+
+---
+
+#### 3.5.3 TECHNICAL MODULE SPECIFICATIONS (Detail View)
+
+Below, every core module is fully defined and explained at the technical level.
 
 ---
 

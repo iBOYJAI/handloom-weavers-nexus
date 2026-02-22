@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handloom Weavers Nexus — DFD & ER Diagrams (White & Black)</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #fff; color: #000; margin: 20px; }
+    h1 { font-size: 1.5rem; border-bottom: 2px solid #000; padding-bottom: 8px; }
+    h2 { font-size: 1.2rem; margin-top: 32px; }
+    .diagram { background: #fff; border: 1px solid #000; padding: 24px; margin: 16px 0; overflow: auto; }
+    .note { font-size: 0.9rem; color: #000; margin-top: 8px; }
+    svg { display: block; }
+    .flow-label { font-size: 9px; fill: #000; font-weight: 500; }
+  </style>
+</head>
+<body>
+  <h1>Handloom Weavers Nexus — DFD & ER Diagrams</h1>
+  <p><strong>Theme:</strong> White background, black lines and text. DFD: External entity = rectangle; Process = circle; Datastore = open box (top, bottom, left only; right open); Arrows = data flow. ER: Chen notation — Entity = rectangle; Relationship = diamond; Attribute = oval.</p>
+
+  <h2>DFD Level 0 (Context)</h2>
+  <div class="diagram">
+    <svg width="800" height="360" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow0" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><polygon points="0 0, 10 5, 0 10" fill="#000"/></marker>
+      </defs>
+      <!-- External entities = rectangles -->
+      <rect x="20" y="20" width="110" height="48" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="75" y="48" text-anchor="middle" fill="#000" font-size="11">Buyer / Visitor</text>
+      <rect x="20" y="156" width="110" height="48" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="75" y="184" text-anchor="middle" fill="#000" font-size="11">Weaver</text>
+      <rect x="20" y="292" width="110" height="48" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="75" y="320" text-anchor="middle" fill="#000" font-size="11">Admin</text>
+      <!-- Central process = circle -->
+      <circle cx="400" cy="180" r="65" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="400" y="172" text-anchor="middle" fill="#000" font-size="11">Handloom Weavers</text>
+      <text x="400" y="188" text-anchor="middle" fill="#000" font-size="11">Nexus</text>
+      <!-- External entity right side -->
+      <rect x="670" y="156" width="110" height="48" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="725" y="184" text-anchor="middle" fill="#000" font-size="11">Admin (Reports)</text>
+      <!-- Flows: entity edges to circle edges (precise connection points) -->
+      <!-- Buyer → System: Login/Browse (top-left quadrant) -->
+      <path d="M 130 44 L 250 120" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="185" y="75" class="flow-label" text-anchor="middle">Login / Browse</text>
+      <!-- Weaver → System: Upload Sarees (center-left) -->
+      <path d="M 130 180 L 335 180" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="228" y="172" class="flow-label" text-anchor="middle">Upload Sarees</text>
+      <!-- Admin → System: Approvals (bottom-left quadrant) -->
+      <path d="M 130 308 L 250 240" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="178" y="268" class="flow-label" text-anchor="middle">Approvals</text>
+      <!-- System → Admin: Reports -->
+      <path d="M 465 180 L 670 180" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="565" y="172" class="flow-label" text-anchor="middle">Reports</text>
+      <!-- System → Buyer: Notifications (above, no overlap) -->
+      <path d="M 370 120 L 200 70 L 130 44" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="250" y="80" class="flow-label" text-anchor="middle">Notifications</text>
+      <!-- System → Weaver: Analytics (below center, no overlap) -->
+      <path d="M 370 235 L 220 208 L 130 185" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow0)"/>
+      <text x="250" y="220" class="flow-label" text-anchor="middle">Analytics</text>
+    </svg>
+    <p class="note">External entities = rectangles; Central process = circle; Arrows = data flow.</p>
+  </div>
+
+  <h2>DFD Level 1 (Processes & Datastores)</h2>
+  <div class="diagram">
+    <svg width="900" height="460" viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a2" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><polygon points="0 0, 10 5, 0 10" fill="#000"/></marker>
+      </defs>
+      <!-- External entities -->
+      <rect x="15" y="30" width="80" height="38" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="55" y="54" text-anchor="middle" fill="#000" font-size="10">Buyer</text>
+      <rect x="15" y="210" width="80" height="38" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="55" y="234" text-anchor="middle" fill="#000" font-size="10">Weaver</text>
+      <rect x="15" y="390" width="80" height="38" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="55" y="414" text-anchor="middle" fill="#000" font-size="10">Admin</text>
+      <!-- Processes -->
+      <circle cx="210" cy="75" r="36" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="210" y="70" text-anchor="middle" fill="#000" font-size="9">1</text>
+      <text x="210" y="84" text-anchor="middle" fill="#000" font-size="9">AUTH</text>
+      <circle cx="210" cy="210" r="36" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="210" y="205" text-anchor="middle" fill="#000" font-size="9">2</text>
+      <text x="210" y="219" text-anchor="middle" fill="#000" font-size="9">Catalog</text>
+      <circle cx="210" cy="345" r="36" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="210" y="340" text-anchor="middle" fill="#000" font-size="9">3</text>
+      <text x="210" y="354" text-anchor="middle" fill="#000" font-size="9">Orders</text>
+      <circle cx="450" cy="210" r="36" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="450" y="205" text-anchor="middle" fill="#000" font-size="9">4</text>
+      <text x="450" y="219" text-anchor="middle" fill="#000" font-size="9">Approvals</text>
+      <circle cx="660" cy="210" r="36" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="660" y="205" text-anchor="middle" fill="#000" font-size="9">5</text>
+      <text x="660" y="219" text-anchor="middle" fill="#000" font-size="9">Reports</text>
+      <!-- Datastores -->
+      <path d="M 340 48 L 440 48 M 440 88 L 340 88 M 340 88 L 340 48" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="390" y="72" text-anchor="middle" fill="#000" font-size="9">users</text>
+      <path d="M 340 183 L 440 183 M 440 223 L 340 223 M 340 223 L 340 183" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="390" y="207" text-anchor="middle" fill="#000" font-size="9">sarees</text>
+      <path d="M 340 318 L 440 318 M 440 358 L 340 358 M 340 358 L 340 318" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="390" y="342" text-anchor="middle" fill="#000" font-size="9">orders</text>
+      <path d="M 520 183 L 600 183 M 600 223 L 520 223 M 520 223 L 520 183" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="560" y="207" text-anchor="middle" fill="#000" font-size="9">approvals</text>
+      <path d="M 730 183 L 820 183 M 820 223 L 730 223 M 730 223 L 730 183" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="775" y="207" text-anchor="middle" fill="#000" font-size="9">audit</text>
+      <!-- Flows -->
+      <path d="M 95 49 L 174 75" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="128" y="58" class="flow-label" text-anchor="middle">login</text>
+      <path d="M 246 75 L 340 68" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="62" class="flow-label" text-anchor="middle">session</text>
+      <path d="M 340 84 L 246 78" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="88" class="flow-label" text-anchor="middle">cred</text>
+      <path d="M 95 68 L 174 195" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="118" y="125" class="flow-label" text-anchor="middle">browse</text>
+      <path d="M 340 218 L 246 215" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="225" class="flow-label" text-anchor="middle">listings</text>
+      <path d="M 95 228 L 174 210" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="128" y="222" class="flow-label" text-anchor="middle">uploads</text>
+      <path d="M 246 197 L 340 203" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="195" class="flow-label" text-anchor="middle">saree data</text>
+      <path d="M 95 363 L 174 345" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="118" y="358" class="flow-label" text-anchor="middle">checkout</text>
+      <path d="M 246 357 L 340 348" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="348" class="flow-label" text-anchor="middle">order</text>
+      <path d="M 340 328 L 246 333" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="288" y="338" class="flow-label" text-anchor="middle">read</text>
+      <path d="M 95 409 L 190 365 L 414 246" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="220" y="365" class="flow-label" text-anchor="middle">review</text>
+      <path d="M 486 210 L 520 207" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="500" y="203" class="flow-label" text-anchor="middle">status</text>
+      <path d="M 520 218 L 486 223" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <path d="M 564 210 L 624 210" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="590" y="203" class="flow-label" text-anchor="middle">data</text>
+      <path d="M 696 210 L 730 207" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a2)"/>
+      <text x="710" y="203" class="flow-label" text-anchor="middle">logs</text>
+    </svg>
+    <p class="note">Processes = circles; Datastores = open-sided boxes (right open). Flows labeled.</p>
+  </div>
+
+  <h2>DFD Level 2 (Order Fulfillment)</h2>
+  <div class="diagram">
+    <svg width="760" height="280" viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a3" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><polygon points="0 0, 10 5, 0 10" fill="#000"/></marker>
+      </defs>
+      <!-- External entity -->
+      <rect x="20" y="80" width="80" height="50" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="60" y="110" text-anchor="middle" fill="#000" font-size="11">Buyer</text>
+      <!-- Processes -->
+      <circle cx="180" cy="105" r="30" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="180" y="100" text-anchor="middle" fill="#000" font-size="9">2.1</text>
+      <text x="180" y="113" text-anchor="middle" fill="#000" font-size="9">Validate</text>
+      <circle cx="340" cy="105" r="30" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="340" y="100" text-anchor="middle" fill="#000" font-size="9">2.2</text>
+      <text x="340" y="113" text-anchor="middle" fill="#000" font-size="9">Create Order</text>
+      <circle cx="500" cy="105" r="30" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="500" y="100" text-anchor="middle" fill="#000" font-size="9">2.3</text>
+      <text x="500" y="113" text-anchor="middle" fill="#000" font-size="9">Deduct Stock</text>
+      <circle cx="660" cy="105" r="30" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="660" y="100" text-anchor="middle" fill="#000" font-size="9">2.4</text>
+      <text x="660" y="113" text-anchor="middle" fill="#000" font-size="9">Notify</text>
+      <!-- Datastore = open box below main flow -->
+      <path d="M 320 185 L 520 185 M 520 220 L 320 220 M 320 220 L 320 185" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="420" y="205" text-anchor="middle" fill="#000" font-size="10">orders / order_items</text>
+      <!-- Flow: Buyer → 2.1 -->
+      <path d="M 100 105 L 150 105" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="122" y="98" class="flow-label" text-anchor="middle">checkout</text>
+      <!-- 2.1 → 2.2 -->
+      <path d="M 210 105 L 310 105" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="258" y="98" class="flow-label" text-anchor="middle">valid</text>
+      <!-- 2.2 → 2.3 -->
+      <path d="M 370 105 L 470 105" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="418" y="98" class="flow-label" text-anchor="middle">order</text>
+      <!-- 2.3 → 2.4 -->
+      <path d="M 530 105 L 630 105" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="578" y="98" class="flow-label" text-anchor="middle">receipt</text>
+      <!-- 2.2 → Datastore (write) -->
+      <path d="M 340 135 L 400 185" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="365" y="162" class="flow-label" text-anchor="middle">create</text>
+      <!-- Datastore → 2.3 (read) -->
+      <path d="M 320 202 L 420 160 L 470 135" stroke="#000" stroke-width="2" fill="none" marker-end="url(#a3)"/>
+      <text x="375" y="172" class="flow-label" text-anchor="middle">read</text>
+    </svg>
+    <p class="note">External entity = rectangle; Processes = circles; Datastore = open box (right open).</p>
+  </div>
+
+  <h2>ER Diagram (Chen Notation)</h2>
+  <div class="diagram">
+    <svg width="1100" height="680" viewBox="0 0 1100 680" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="aer" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0, 8 4, 0 8" fill="#000"/></marker>
+      </defs>
+      <!-- Entities (rectangles) -->
+      <rect x="40" y="50" width="85" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="82" y="75" text-anchor="middle" fill="#000" font-size="11">USER</text>
+      <rect x="260" y="50" width="95" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="307" y="75" text-anchor="middle" fill="#000" font-size="11">SAREE</text>
+      <rect x="520" y="50" width="120" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="580" y="75" text-anchor="middle" fill="#000" font-size="10">saree_categories</text>
+      <rect x="220" y="170" width="100" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="270" y="194" text-anchor="middle" fill="#000" font-size="9">saree_images</text>
+      <rect x="450" y="170" width="105" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="502" y="194" text-anchor="middle" fill="#000" font-size="9">saree_variants</text>
+      <rect x="220" y="280" width="85" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="262" y="304" text-anchor="middle" fill="#000" font-size="9">saree_approvals</text>
+      <rect x="40" y="380" width="85" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="82" y="405" text-anchor="middle" fill="#000" font-size="11">USER</text>
+      <rect x="250" y="380" width="95" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="297" y="405" text-anchor="middle" fill="#000" font-size="11">ORDER</text>
+      <rect x="430" y="380" width="95" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="477" y="404" text-anchor="middle" fill="#000" font-size="9">order_items</text>
+      <rect x="600" y="370" width="130" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="665" y="394" text-anchor="middle" fill="#000" font-size="8">order_customizations</text>
+      <rect x="40" y="500" width="85" height="42" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="82" y="525" text-anchor="middle" fill="#000" font-size="11">USER</text>
+      <rect x="230" y="500" width="80" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="270" y="524" text-anchor="middle" fill="#000" font-size="9">cart_items</text>
+      <rect x="380" y="500" width="85" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="422" y="524" text-anchor="middle" fill="#000" font-size="9">wishlist</text>
+      <rect x="520" y="500" width="110" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="575" y="524" text-anchor="middle" fill="#000" font-size="9">notifications</text>
+      <rect x="700" y="500" width="100" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="750" y="524" text-anchor="middle" fill="#000" font-size="9">weaver_stories</text>
+      <rect x="860" y="500" width="95" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="907" y="524" text-anchor="middle" fill="#000" font-size="9">story_approvals</text>
+      <rect x="250" y="600" width="70" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="285" y="624" text-anchor="middle" fill="#000" font-size="9">reviews</text>
+      <rect x="420" y="600" width="80" height="40" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="460" y="624" text-anchor="middle" fill="#000" font-size="9">offers</text>
+      <!-- Relationships (diamonds) -->
+      <polygon points="175,71 220,91 175,111 130,91" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="175" y="94" text-anchor="middle" fill="#000" font-size="8">PROVIDES</text>
+      <polygon points="395,71 440,91 395,111 350,91" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="395" y="94" text-anchor="middle" fill="#000" font-size="8">IN</text>
+      <polygon points="307,125 347,150 307,175 267,150" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="307" y="153" text-anchor="middle" fill="#000" font-size="7">HAS_IMAGE</text>
+      <polygon points="395,150 435,170 395,190 355,170" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="395" y="173" text-anchor="middle" fill="#000" font-size="7">HAS_VARIANT</text>
+      <polygon points="360,220 395,245 360,270 325,245" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="360" y="248" text-anchor="middle" fill="#000" font-size="7">APPROVED_BY</text>
+      <polygon points="150,405 195,425 150,445 105,425" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="150" y="428" text-anchor="middle" fill="#000" font-size="8">PLACES</text>
+      <polygon points="345,405 390,425 345,445 300,425" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="345" y="428" text-anchor="middle" fill="#000" font-size="8">CONTAINS</text>
+      <polygon points="525,400 570,420 525,440 480,420" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="525" y="423" text-anchor="middle" fill="#000" font-size="7">CUSTOMIZES</text>
+      <polygon points="155,545 195,565 155,585 115,565" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="155" y="568" text-anchor="middle" fill="#000" font-size="7">IN_CART</text>
+      <polygon points="330,545 370,565 330,585 290,565" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="330" y="568" text-anchor="middle" fill="#000" font-size="7">WISHLISTS</text>
+      <polygon points="455,545 495,565 455,585 415,565" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="455" y="568" text-anchor="middle" fill="#000" font-size="7">RECEIVES</text>
+      <polygon points="630,545 670,565 630,585 590,565" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="630" y="568" text-anchor="middle" fill="#000" font-size="7">AUTHORS</text>
+      <polygon points="795,545 835,565 795,585 755,565" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="795" y="568" text-anchor="middle" fill="#000" font-size="7">APPROVED_BY</text>
+      <polygon points="270,600 310,620 270,640 230,620" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="270" y="623" text-anchor="middle" fill="#000" font-size="7">REVIEWS</text>
+      <polygon points="370,425 410,445 370,465 330,445" fill="none" stroke="#000" stroke-width="2"/>
+      <text x="370" y="448" text-anchor="middle" fill="#000" font-size="7">APPLIES</text>
+      <!-- Relationship lines -->
+      <path d="M 125 71 L 130 91" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 220 91 L 260 71" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 355 71 L 350 91" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 440 91 L 520 71" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 307 92 L 307 125" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 267 150 L 270 170" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 307 175 L 270 190" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 307 92 L 355 170" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 435 170 L 450 190" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 307 92 L 325 245" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 360 270 L 262 300" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 395 245 L 307 92" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 405 L 105 425" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 195 425 L 250 405" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 300 425 L 345 405" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 390 425 L 430 400" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 480 420 L 600 390" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 570 420 L 665 390" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 330 465 L 297 405" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 410 445 L 460 610" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 545 L 115 565" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 521 L 290 565" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 521 L 415 565" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 521 L 590 565" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 195 565 L 230 520" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 270 500 L 295 92" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 370 565 L 380 520" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 422 500 L 320 92" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 415 565 L 520 520" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 495 565 L 575 524" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 590 565 L 630 545" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 670 565 L 700 520" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 755 565 L 860 520" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 835 565 L 907 524" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 125 521 L 230 620" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 310 620 L 250 620" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <path d="M 285 600 L 280 92" stroke="#000" stroke-width="1.5" fill="none" marker-end="url(#aer)"/>
+      <!-- Attributes (ovals) - key attrs per entity -->
+      <ellipse cx="82" cy="108" rx="48" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="82" y="112" text-anchor="middle" fill="#000" font-size="7">id, name, email, role</text>
+      <ellipse cx="307" cy="108" rx="52" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="307" y="112" text-anchor="middle" fill="#000" font-size="7">id, weaver_id, title, price, stock</text>
+      <ellipse cx="580" cy="108" rx="50" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="580" y="112" text-anchor="middle" fill="#000" font-size="7">id, name, slug</text>
+      <ellipse cx="270" cy="228" rx="55" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="270" y="232" text-anchor="middle" fill="#000" font-size="7">id, saree_id, file_path, is_primary</text>
+      <ellipse cx="502" cy="228" rx="58" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="502" y="232" text-anchor="middle" fill="#000" font-size="7">id, saree_id, color_name, stock</text>
+      <ellipse cx="262" cy="338" rx="52" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="262" y="342" text-anchor="middle" fill="#000" font-size="7">id, saree_id, status, admin_id</text>
+      <ellipse cx="297" cy="438" rx="55" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="297" y="442" text-anchor="middle" fill="#000" font-size="7">id, buyer_id, total_amount, status</text>
+      <ellipse cx="477" cy="438" rx="58" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="477" y="442" text-anchor="middle" fill="#000" font-size="7">id, order_id, saree_id, quantity</text>
+      <ellipse cx="665" cy="438" rx="55" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="665" y="442" text-anchor="middle" fill="#000" font-size="7">id, order_item_id, blouse_color</text>
+      <ellipse cx="270" cy="558" rx="48" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="270" y="562" text-anchor="middle" fill="#000" font-size="7">id, user_id, saree_id, quantity</text>
+      <ellipse cx="422" cy="558" rx="45" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="422" y="562" text-anchor="middle" fill="#000" font-size="7">id, user_id, saree_id</text>
+      <ellipse cx="575" cy="558" rx="50" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="575" y="562" text-anchor="middle" fill="#000" font-size="7">id, user_id, message, type</text>
+      <ellipse cx="750" cy="558" rx="52" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="750" y="562" text-anchor="middle" fill="#000" font-size="7">id, weaver_id, caption, media_path</text>
+      <ellipse cx="907" cy="558" rx="48" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="907" y="562" text-anchor="middle" fill="#000" font-size="7">id, story_id, status, admin_id</text>
+      <ellipse cx="285" cy="658" rx="52" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="285" y="662" text-anchor="middle" fill="#000" font-size="7">id, buyer_id, saree_id, rating</text>
+      <ellipse cx="460" cy="658" rx="52" ry="11" fill="none" stroke="#000" stroke-width="1.5"/>
+      <text x="460" y="662" text-anchor="middle" fill="#000" font-size="7">id, title, type, value, dates</text>
+    </svg>
+    <p class="note">Entities = rectangles; Relationships = diamonds; Attributes = ovals. Full specs in Section 3.4.</p>
+  </div>
+
+  <p style="margin-top: 24px;"><strong>Handloom Weavers Nexus</strong> — DFD & ER diagrams. White and black theme. For full attribute list (ovals) see Section 3.3 and 3.4 in COMPLETE_PROJECT_REPORT.md.</p>
+</body>
+</html>
