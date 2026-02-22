@@ -40,18 +40,20 @@
 | 3.5 MODULE SPECIFICATION | 80 |
 | 3.6 INPUT & OUTPUT DESIGN | 88 |
 | **CHAPTER 4: TESTING AND IMPLEMENTATION** | **95** |
-| 4.1 IMPLEMENTATION TOOLS & ENVIRONMENT | 97 |
-| 4.2 SYSTEM SECURITY POLICIES | 102 |
-| 4.3 UNIT & INTEGRATION TESTING | 108 |
-| 4.4 USER ACCEPTANCE TESTING (UAT) | 115 |
+| 4.1 SYSTEM TESTING | 97 |
+| 4.2 IMPLEMENTATION TOOLS & ENVIRONMENT | 102 |
+| 4.3 SYSTEM SECURITY POLICIES | 108 |
+| 4.4 UNIT & INTEGRATION TESTING | 115 |
+| 4.5 USER ACCEPTANCE TESTING (UAT) | 120 |
 | **CHAPTER 5: CONCLUSION AND SUGGESTIONS** | **122** |
 | 5.1 PROJECT CONCLUSION | 123 |
 | 5.2 SUGGESTIONS FOR FUTURE WORK | 126 |
 | **BIBLIOGRAPHY** | **130** |
 | **APPENDICES** | **PAGE No.** |
-| APPENDIX - A ( SCREEN FORMATS ) | 134 |
-| APPENDIX - B ( DATA DICTIONARY TABLES ) | 150 |
+| APPENDIX - A ( FORMS ) | 134 |
+| APPENDIX - B ( REPORTS ) | 150 |
 | APPENDIX - C ( SAMPLE CODE SNIPPETS ) | 165 |
+| APPENDIX - D ( SCREENSHOTS ) | 170 |
 
 ---
 
@@ -396,34 +398,202 @@ This section details the physical design of the database, ensuring ACIDity (Atom
 | 16 | `reviews` | Buyer reviews (rating, comment) per saree. |
 | 17 | `wishlist` | User wishlists; user_id, saree_id. |
 
-#### Sample Table Specifications
+#### Table Design (File Specifications)
 
-#### Table 1: `users`
+**Table 1: `users`**
 | Field | Type | Constraint | Purpose |
 | :--- | :--- | :--- | :--- |
-| `id` | INT | PRIMARY KEY, AUTO_INC | Unique user identifier. |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Unique user identifier. |
 | `name` | VARCHAR(100) | NOT NULL | Personal or business name. |
 | `email` | VARCHAR(255) | UNIQUE, NOT NULL | Login credential. |
-| `password_hash` | VARCHAR(255) | NOT NULL | Salt-hashed secret. |
-| `role` | ENUM | default 'buyer' | Role-Based Access Control. |
+| `password_hash` | VARCHAR(255) | NOT NULL | Salt-hashed password. |
+| `role` | ENUM('buyer','weaver','admin') | NOT NULL, DEFAULT 'buyer' | Role-Based Access Control. |
+| `region` | VARCHAR(100) | NULL | Geographic region. |
+| `phone` | VARCHAR(20) | NULL | Contact number. |
+| `avatar` | VARCHAR(500) | NULL | Profile image path. |
+| `address` | TEXT | NULL | Delivery/postal address. |
+| `is_approved` | TINYINT(1) | DEFAULT 0 | Weaver approval flag. |
+| `is_suspended` | TINYINT(1) | DEFAULT 0 | Account suspension flag. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
 
-#### Table 2: `sarees`
+**Table 2: `sessions`**
 | Field | Type | Constraint | Purpose |
 | :--- | :--- | :--- | :--- |
-| `id` | INT | PRIMARY KEY, AUTO_INC | Product identifier. |
-| `weaver_id` | INT | FOREIGN KEY (users.id) | Link to producing artisan. |
-| `category_id` | INT | FOREIGN KEY (saree_categories.id) | Product category. |
-| `title` | VARCHAR(100) | NOT NULL | Marketable name. |
-| `price` | DECIMAL(10,2) | NOT NULL | Sale price in INR. |
-| `stock` | INT | NOT NULL, default 0 | Available quantity. |
+| `session_id` | VARCHAR(128) | PRIMARY KEY | Express session identifier. |
+| `expires` | INT(11) UNSIGNED | NOT NULL | Expiration timestamp. |
+| `data` | MEDIUMTEXT | NULL | Serialized session data. |
 
-#### Table 3: `weaver_stories`
+**Table 3: `saree_categories`**
 | Field | Type | Constraint | Purpose |
 | :--- | :--- | :--- | :--- |
-| `id` | INT | PRIMARY KEY, AUTO_INC | Story identifier. |
-| `weaver_id` | INT | FOREIGN KEY (users.id) | Author identification. |
-| `media_path` / `media_paths` | VARCHAR(500) / TEXT | NOT NULL | Media file path(s). |
-| `is_approved` | TINYINT(1) | default 0 | Visibility toggle. |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Category identifier. |
+| `name` | VARCHAR(100) | NOT NULL, UNIQUE | Display name (e.g. Kanchipuram Silk). |
+| `slug` | VARCHAR(100) | NOT NULL, UNIQUE | URL-friendly identifier. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 4: `offers`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Offer identifier. |
+| `title` | VARCHAR(200) | NOT NULL | Offer title. |
+| `description` | TEXT | NULL | Offer description. |
+| `type` | ENUM('percentage','fixed','free_shipping','bogo') | NOT NULL | Discount type. |
+| `value` | DECIMAL(10,2) | NOT NULL | Discount value. |
+| `start_date` | DATE | NOT NULL | Offer start date. |
+| `end_date` | DATE | NOT NULL | Offer end date. |
+| `is_active` | TINYINT(1) | DEFAULT 1 | Active flag. |
+| `category_id` | INT | NULL, FK(saree_categories.id) | Category-specific offer. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 5: `sarees`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Product identifier. |
+| `weaver_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | Producing weaver. |
+| `category_id` | INT | NOT NULL, FK(saree_categories.id) | Product category. |
+| `title` | VARCHAR(100) | NOT NULL | Product title. |
+| `description` | TEXT | NOT NULL | Product description. |
+| `price` | DECIMAL(10,2) | NOT NULL, CHECK (price > 0) | Sale price in INR. |
+| `stock` | INT | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Available quantity. |
+| `blouse_colors` | JSON | NULL | Optional blouse color options. |
+| `is_active` | TINYINT(1) | DEFAULT 1 | Listing active flag. |
+| `is_approved` | TINYINT(1) | DEFAULT 0 | Admin approval flag. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 6: `saree_images`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Image identifier. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Parent saree. |
+| `file_path` | VARCHAR(500) | NOT NULL | Image file path. |
+| `is_primary` | TINYINT(1) | DEFAULT 0 | Thumbnail/primary image flag. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 7: `saree_variants`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Variant identifier. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Parent saree. |
+| `color_name` | VARCHAR(50) | NOT NULL | Color name. |
+| `color_code` | VARCHAR(7) | NOT NULL | Hex color code. |
+| `design_name` | VARCHAR(100) | NOT NULL | Design variant name. |
+| `design_description` | TEXT | NULL | Design description. |
+| `image_path` | VARCHAR(500) | NOT NULL | Variant image path. |
+| `stock` | INT | NOT NULL DEFAULT 0, CHECK (stock >= 0) | Variant stock. |
+| `price_adjustment` | DECIMAL(10,2) | DEFAULT 0 | Price delta for variant. |
+| `is_active` | TINYINT(1) | DEFAULT 1 | Active flag. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 8: `saree_approvals`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Approval record identifier. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Saree under review. |
+| `status` | ENUM('pending','approved','rejected') | NOT NULL, DEFAULT 'pending' | Approval status. |
+| `admin_id` | INT | NULL, FK(users.id) ON DELETE SET NULL | Reviewing admin. |
+| `rejection_reason` | TEXT | NULL | Reason if rejected. |
+| `reviewed_at` | TIMESTAMP | NULL | When reviewed. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 9: `orders`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Order identifier. |
+| `buyer_id` | INT | NOT NULL, FK(users.id) ON DELETE RESTRICT | Purchasing user. |
+| `total_amount` | DECIMAL(10,2) | NOT NULL, CHECK (total_amount > 0) | Order total in INR. |
+| `status` | ENUM('pending','confirmed','shipped','delivered','cancelled') | NOT NULL, DEFAULT 'pending' | Order status. |
+| `payment_method` | VARCHAR(10) | NOT NULL, DEFAULT 'COD' | Payment method. |
+| `address` | TEXT | NOT NULL | Delivery address. |
+| `offer_id` | INT | NULL, FK(offers.id) ON DELETE SET NULL | Applied offer. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Order creation time. |
+| `updated_at` | TIMESTAMP | ON UPDATE CURRENT_TIMESTAMP | Last update time. |
+
+**Table 10: `order_items`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Line item identifier. |
+| `order_id` | INT | NOT NULL, FK(orders.id) ON DELETE CASCADE | Parent order. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE RESTRICT | Product ordered. |
+| `quantity` | INT | NOT NULL, CHECK (quantity > 0) | Quantity ordered. |
+| `price_at_purchase` | DECIMAL(10,2) | NOT NULL, CHECK (price_at_purchase > 0) | Unit price at order time. |
+
+**Table 11: `order_customizations`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Customization identifier. |
+| `order_item_id` | INT | NOT NULL, FK(order_items.id) ON DELETE CASCADE | Order line item. |
+| `blouse_color` | VARCHAR(50) | NULL | Selected blouse color. |
+| `custom_design_type` | ENUM('peacock','temple','name','other') | NULL | Type of custom design. |
+| `custom_design_text` | VARCHAR(500) | NULL | Custom text (e.g. name). |
+| `custom_design_image` | VARCHAR(500) | NULL | Custom design image path. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 12: `cart_items`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Cart line identifier. |
+| `user_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | Cart owner. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Product in cart. |
+| `quantity` | INT | NOT NULL, CHECK (quantity > 0) | Quantity. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | When added. |
+| `updated_at` | TIMESTAMP | ON UPDATE CURRENT_TIMESTAMP | Last update. |
+| UNIQUE | (user_id, saree_id) | — | One cart line per user per saree. |
+
+**Table 13: `weaver_stories`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Story identifier. |
+| `weaver_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | Author (weaver). |
+| `title` | VARCHAR(255) | NULL | Story title. |
+| `caption` | VARCHAR(500) | NOT NULL | Short caption. |
+| `description` | TEXT | NULL | Full description. |
+| `media_path` | VARCHAR(500) | NOT NULL | Primary media file path. |
+| `media_type` | ENUM('image','video') | NOT NULL | Media type. |
+| `media_paths` | TEXT | NULL | JSON array of additional paths. |
+| `media_types` | TEXT | NULL | Types for multiple media. |
+| `is_approved` | TINYINT(1) | DEFAULT 0 | Visibility after approval. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 14: `story_approvals`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Approval record identifier. |
+| `story_id` | INT | NOT NULL, FK(weaver_stories.id) ON DELETE CASCADE | Story under review. |
+| `status` | ENUM('pending','approved','rejected') | NOT NULL, DEFAULT 'pending' | Approval status. |
+| `admin_id` | INT | NULL, FK(users.id) ON DELETE SET NULL | Reviewing admin. |
+| `rejection_reason` | TEXT | NULL | Reason if rejected. |
+| `reviewed_at` | TIMESTAMP | NULL | When reviewed. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Record creation time. |
+
+**Table 15: `notifications`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Notification identifier. |
+| `user_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | Recipient. |
+| `message` | TEXT | NOT NULL | Notification text. |
+| `type` | VARCHAR(50) | NOT NULL | Notification type/category. |
+| `is_read` | TINYINT(1) | DEFAULT 0 | Read flag. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | When created. |
+
+**Table 16: `reviews`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Review identifier. |
+| `buyer_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | Reviewer. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Product reviewed. |
+| `rating` | INT | NOT NULL, CHECK (rating 1–5) | Star rating. |
+| `comment` | TEXT | NULL | Optional review text. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | When submitted. |
+| UNIQUE | (buyer_id, saree_id) | — | One review per buyer per saree. |
+
+**Table 17: `wishlist`**
+| Field | Type | Constraint | Purpose |
+| :--- | :--- | :--- | :--- |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Wishlist entry identifier. |
+| `user_id` | INT | NOT NULL, FK(users.id) ON DELETE CASCADE | User. |
+| `saree_id` | INT | NOT NULL, FK(sarees.id) ON DELETE CASCADE | Saree saved. |
+| `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | When added. |
+| UNIQUE | (user_id, saree_id) | — | One wishlist entry per user per saree. |
 
 ### 3.5 MODULE SPECIFICATION
 
@@ -449,7 +619,51 @@ The software is built on a "Modular Engine" philosophy. Each module is self-cont
 
 ## CHAPTER 4: TESTING AND IMPLEMENTATION
 
-### 4.1 IMPLEMENTATION TOOLS & ENVIRONMENT
+### 4.1 SYSTEM TESTING
+
+System testing is a critical phase in software development that ensures the entire system functions correctly and meets the specified requirements. It verifies that all integrated components work together as expected and helps identify any defects before deployment. This phase includes various testing methods to ensure the system's stability, performance, and security.
+
+The Handloom Weavers Nexus system is tested by executing different test cases and evaluating the results. If any errors are detected, they are fixed and retested. The main objective of system testing is to validate the system's behaviour under real-world conditions—such as weaver uploads, admin approvals, buyer checkout, and role-based access—before moving to user acceptance testing.
+
+#### UNIT TESTING
+
+Unit testing focuses on verifying individual components or modules of the software. Each module is tested separately to ensure it functions correctly before integrating it with other parts of the system.
+
+In this project, unit testing is performed on different modules, such as **saree upload forms**, **cart and wishlist operations**, **user authentication (login/register)**, **database connection (MySQL)**, **admin approval workflows**, **weaver sales report generation**, and **notification creation**. Each module is tested independently to identify and fix errors early in the development process.
+
+#### INTEGRATION TESTING
+
+Integration testing ensures that multiple modules of the system work together as intended. It verifies data flow between components and checks if integrated parts interact properly.
+
+In this project, integration testing is conducted on **database interactions** (models with MySQL), **user authentication with session store and role middleware**, **saree listing with category and weaver data**, **checkout with cart, orders, and order_items**, and **weaver dashboard with orders and analytics**. This helps detect issues in module communication and ensures seamless operation across the MVC layers.
+
+#### VALIDATION TESTING
+
+Validation testing confirms that the system meets user requirements and behaves as expected. It ensures that the software functions correctly based on input conditions and business rules.
+
+For this project, validation testing is used to check **user input fields** (email format, password strength, required fields), **access restrictions** (buyer cannot access admin approvals; weaver cannot access other weavers' sarees), **data processing logic** (stock deduction on order, offer application at checkout), and **system responses to invalid data** (wrong credentials, out-of-stock purchase attempts). The system is tested under different scenarios to ensure correctness.
+
+#### OUTPUT TESTING
+
+Output testing verifies that the system produces accurate and meaningful results. It checks whether system-generated outputs, such as reports, calculations, and stored data, are correct and properly formatted.
+
+In this project, output testing is performed on **weaver sales reports**, **admin analytics and dashboard charts**, **order history and receipts**, **saree listing and search results**, and **stored records in the database** to ensure consistency and accuracy. This ensures that users receive correct information based on their inputs and role.
+
+#### WHITE BOX TESTING
+
+White box testing evaluates the internal structure and logic of the system. It ensures that the system's code and algorithms function correctly by examining control structures such as loops, conditions, and data flow.
+
+In this project, white box testing is applied to critical functions such as **password hashing and comparison (Bcrypt)**, **login authentication and session creation**, **stock validation and deduction during checkout**, **role-based route guards**, and **image upload and path sanitization**. It helps verify that internal processes execute correctly and securely.
+
+#### BLACK BOX TESTING
+
+Black box testing assesses the system's functionality without analysing the internal code. It focuses on detecting errors related to missing functions, incorrect outputs, interface issues, and database interactions.
+
+For this project, black box testing is conducted on **user interfaces** (buyer home, weaver dashboard, admin approvals), **form validations** (saree upload, checkout, registration), **error messages and redirects**, **API responses**, and **navigation and sidebar behaviour** to ensure the software meets functional requirements from the end user's perspective.
+
+---
+
+### 4.2 IMPLEMENTATION TOOLS & ENVIRONMENT
 
 The implementation followed a **Gitflow Workflow**, ensuring that the `main` branch always represents a stable, production-ready state.
 
@@ -458,7 +672,7 @@ The implementation followed a **Gitflow Workflow**, ensuring that the `main` bra
 - **Configuration**: Use of `.env` files for managing sensitive secrets like database credentials and session salts.
 - **Bat Scripts**: Provided `setup.bat` and `start.bat` to automate the onboarding for new developers or auditors.
 
-### 4.2 SYSTEM SECURITY POLICIES
+### 4.3 SYSTEM SECURITY POLICIES
 
 Security is not an afterthought in Handloom Weavers Nexus; it is baked into every layer.
 1. **Password Fortification**: Using `Bcrypt.js` with a work factor of 12, ensuring that even in the event of a database leak, the passwords remain computationally impossible to crack.
@@ -466,7 +680,7 @@ Security is not an afterthought in Handloom Weavers Nexus; it is baked into ever
 3. **Session Integrity**: Server-side sessions are stored in an encrypted store, with HTTP-only cookies to prevent XSS-based session hijacking.
 4. **Role Isolation**: Express middleware ensures that a weaver can never access admin routes, and a buyer can never access weaver dashboards.
 
-### 4.3 UNIT & INTEGRATION TESTING
+### 4.4 UNIT & INTEGRATION TESTING
 
 We utilized a rigorous manual and automated testing suite during the "Final System Polish".
 
@@ -477,7 +691,7 @@ We utilized a rigorous manual and automated testing suite during the "Final Syst
 | **UT-03** | Media Engine| Upload 5 images to one story | All 5 render in the lightbox modal | **PASS** |
 | **IT-01** | Full Flow | Create Weaver -> Upload Saree -> Approve Saree -> Buy Saree | End-to-end transaction integrity | **PASS** |
 
-### 4.4 USER ACCEPTANCE TESTING (UAT)
+### 4.5 USER ACCEPTANCE TESTING (UAT)
 
 UAT was conducted with a pool of "Beta Weavers" to test behavioral feasibility. Feedback led to several key improvements:
 - **Change**: Rename "Artisan Stories" to simply "Stories" for a cleaner UI.
@@ -509,28 +723,223 @@ The project establishes a foundation for several visionary next-generation featu
 3. **W3C Tutorials**. (2024). *Modern CSS Grid & Flexbox Architectures*. w3.org.
 4. **Node.js Community**. (2024). *Event-Driven Non-Blocking I/O in Scaling Web Applications*. nodejs.org.
 5. **MySQL Engineering**. (2023). *Optimizing InnoDB for High-Concurrency Transactional Workloads*. mysql.com.
+6. **Express.js**. (2024). *Express - Node.js web application framework*. expressjs.com.
+7. **Silberschatz, A., Korth, H. F., Sudarshan, S.** (2019). *Database System Concepts* (7th ed.). McGraw-Hill.
+8. **Pressman, R. S., Maxim, B. R.** (2014). *Software Engineering: A Practitioner's Approach* (8th ed.). McGraw-Hill.
+9. **MDN Web Docs**. (2024). *JavaScript Guide, Fetch API, and Web APIs*. developer.mozilla.org.
+10. **OWASP Foundation**. (2023). *OWASP Top Ten Web Application Security Risks*. owasp.org.
+11. **Sommerville, I.** (2015). *Software Engineering* (10th ed.). Pearson.
+12. **Oracle Corporation**. (2024). *MySQL 8.0 Reference Manual*. dev.mysql.com.
+13. **W3Schools**. (2024). *HTML, CSS, JavaScript, and SQL Tutorials*. w3schools.com.
+14. **Ministry of Textiles, Government of India**. (2023). *Handloom Sector in India - Overview and Schemes*. texmin.nic.in.
+15. **IEEE**. (2021). *Software and Systems Engineering - System and Software Testing*. IEEE Standards.
 
 ---
 
 ## APPENDICES
 
-### APPENDIX - A ( SCREEN FORMATES )
+### APPENDIX - A ( FORMS )
 
-The visual identity of Handloom Weavers Nexus is built on high-contrast "Glassmorphism" and "Notion-Style" aesthetics.
+This appendix lists all input forms and data entry screens in the Handloom Weavers Nexus system. These forms enable users to interact with the system, submit data, and manage their accounts and products.
 
-1. **The Hero Gallery**: A wide-screen banner showcasing the "Weaving Process" to establish immediate trust.
-2. **The Story Reel**: Cinematic grid of weaver videos, each with a dark-gradient overlay and white typography for maximum "vibe".
-3. **The Weaver Management Center**: A professional, white-and-gray interface focused on data density and clarity.
-4. **Admin Command Deck**: A dark-themed audit portal with side-by-side comparison tools for rapid moderation.
+#### Authentication Forms
 
-### APPENDIX - B ( DATA DICTIONARY TABLES )
+1. **Login Form** (`login.html`)
+   - User authentication with email and password
+   - "Remember me" functionality
+   - Password visibility toggle
+   - Redirects based on user role after login
 
-#### Saree Images Dictionary
-| Field | Data Type | Constraint |
-| :--- | :--- | :--- |
-| `saree_id` | INT | FOREIGN KEY |
-| `file_path` | VARCHAR(500) | Location on disk |
-| `is_primary`| BOOLEAN | Thumbnail flag |
+2. **Registration Form** (`register.html`)
+   - New user account creation
+   - Email validation
+   - Password strength requirements
+   - Role selection (Buyer/Weaver)
+
+3. **Weaver Registration Form** (`join-weaver.html`)
+   - Specialized form for weaver signup
+   - Additional fields: region, phone, address
+   - Pending approval workflow
+
+#### Buyer Forms
+
+4. **Profile Form** (`profile.html`)
+   - User profile editing
+   - Address management
+   - Avatar upload
+   - Password change
+
+5. **Cart Form** (`cart.html`)
+   - Shopping cart management
+   - Quantity adjustment
+   - Item removal
+   - Proceed to checkout
+
+6. **Checkout Form** (`checkout.html`)
+   - Order placement
+   - Delivery address input
+   - Payment method selection (COD)
+   - Offer code application
+   - Order summary and confirmation
+
+#### Weaver Forms
+
+7. **Saree Upload Form** (`weaver-upload.html`)
+   - Product listing creation
+   - Multiple image uploads
+   - Category selection
+   - Price and stock entry
+   - Blouse color options
+   - Description and title
+
+8. **Story Upload Form** (`weaver-story.html`)
+   - Artisan story creation
+   - Media upload (images/videos)
+   - Caption and description
+   - Title entry
+
+9. **Weaver Profile Edit** (`weaver-edit.html`)
+   - Weaver profile management
+   - Business information update
+   - Contact details
+
+10. **Saree Management** (`weaver-sarees.html`)
+    - List of weaver's sarees
+    - Edit/delete operations
+    - Status tracking
+
+11. **Story Management** (`weaver-manage-stories.html`)
+    - List of weaver's stories
+    - Edit/delete operations
+    - Approval status
+
+#### Admin Forms
+
+12. **Admin Approvals Form** (`admin-approvals.html`)
+    - Saree approval/rejection
+    - Story approval/rejection
+    - Rejection reason input
+    - Bulk actions
+
+13. **Category Management Form** (`admin-categories.html`)
+    - Add/edit/delete categories
+    - Category name and slug
+
+14. **Offer Management Form** (`admin-offers.html`)
+    - Create/edit offers
+    - Offer type selection (percentage/fixed/free shipping/BOGO)
+    - Date range setting
+    - Category-specific offers
+
+15. **User Management Form** (`admin-users.html`)
+    - User list and search
+    - User approval/suspension
+    - Role management
+    - User details view
+
+16. **Saree Management Form** (`admin-sarees.html`)
+    - All sarees listing
+    - Filter and search
+    - Edit/delete operations
+    - Approval status management
+
+### APPENDIX - B ( REPORTS )
+
+This appendix lists all report and analytics screens in the Handloom Weavers Nexus system. These screens provide insights, summaries, and detailed views of system data for decision-making and monitoring.
+
+#### Admin Reports
+
+1. **Admin Dashboard** (`admin-dashboard.html`)
+   - Platform overview statistics
+   - Key metrics (users, sarees, orders, revenue)
+   - Visual charts and graphs
+   - Recent activity summary
+
+2. **Admin Analytics** (`admin-analytics.html`)
+   - Detailed platform insights
+   - Growth trends visualization
+   - User engagement metrics
+   - Sales performance charts
+   - Category-wise analysis
+
+3. **Admin Report** (`admin-report.html`)
+   - Comprehensive system reports
+   - Exportable data summaries
+   - Custom date range filtering
+   - Performance metrics
+
+4. **Admin Orders Report** (`admin-orders.html`)
+   - All orders listing
+   - Order status tracking
+   - Filter by status, date, user
+   - Order details view
+
+#### Weaver Reports
+
+5. **Weaver Dashboard** (`weaver-dashboard.html`)
+   - Personal sales overview
+   - Order statistics
+   - Revenue summary
+   - Pending approvals count
+   - Quick actions
+
+6. **Weaver Sales Report** (`weaver-sales-report.html`)
+   - Detailed sales analytics
+   - Top-selling sarees
+   - Revenue trends
+   - Monthly/yearly breakdown
+   - Performance metrics
+
+7. **Weaver Orders Report** (`weaver-orders.html`)
+   - Orders received by weaver
+   - Order status tracking
+   - Customer information
+   - Order fulfillment details
+
+#### Buyer Reports
+
+8. **Order History** (`order-history.html`)
+   - Buyer's order list
+   - Order status tracking
+   - Order details and items
+   - Tracking information
+   - Reorder functionality
+
+#### Display Screens (Informational)
+
+9. **Buyer Home** (`buyer-home.html`)
+   - Product catalog display
+   - Featured sarees
+   - Category browsing
+   - Search functionality
+
+10. **Saree Detail** (`saree-detail.html`)
+    - Product detail view
+    - Image gallery
+    - Variant selection
+    - Add to cart/wishlist
+    - Reviews display
+
+11. **Story Gallery** (`story.html`)
+    - All weaver stories display
+    - Media grid view
+    - Story detail navigation
+
+12. **Story Detail** (`story-detail.html`)
+    - Individual story view
+    - Media playback
+    - Weaver information
+    - Related stories
+
+13. **Wishlist** (`wishlist.html`)
+    - Saved items display
+    - Remove from wishlist
+    - Quick add to cart
+
+14. **Weaver Pending** (`weaver-pending.html`)
+    - Pending approval status
+    - Application details
+    - Waiting message
 
 ### APPENDIX - C ( SAMPLE CODE SNIPPETS )
 
@@ -548,6 +957,142 @@ function injectSidebar() {
   `).join('');
 }
 ```
+
+### APPENDIX - D ( SCREENSHOTS )
+
+This appendix contains full-page screenshots of the Handloom Weavers Nexus application. All images are captured from the running system and saved in `screenshots/full/`. Viewport (screen-height) versions are available in `screenshots/viewport/`.
+
+#### Public & Guest Screens
+
+**Fig. D.1 – Buyer Home (Product Catalog)**
+
+![Buyer Home](screenshots/full/01_Buyer_Home.png)
+
+**Fig. D.2 – Login**
+
+![Login](screenshots/full/02_Login.png)
+
+**Fig. D.3 – Registration**
+
+![Registration](screenshots/full/03_Register.png)
+
+**Fig. D.4 – Join Weaver**
+
+![Join Weaver](screenshots/full/04_Join_Weaver.png)
+
+**Fig. D.5 – Saree Detail**
+
+![Saree Detail](screenshots/full/05_Saree_Detail.png)
+
+**Fig. D.6 – Story Gallery**
+
+![Story Gallery](screenshots/full/06_Story_Gallery.png)
+
+**Fig. D.7 – Story Detail**
+
+![Story Detail](screenshots/full/07_Story_Detail.png)
+
+**Fig. D.8 – FAQ**
+
+![FAQ](screenshots/full/08_FAQ.png)
+
+**Fig. D.9 – Contact**
+
+![Contact](screenshots/full/09_Contact.png)
+
+#### Buyer Portal (Post-Login)
+
+**Fig. D.10 – Buyer Profile**
+
+![Buyer Profile](screenshots/full/11_Buyer_Profile.png)
+
+**Fig. D.11 – Shopping Cart**
+
+![Cart](screenshots/full/12_Buyer_Cart.png)
+
+**Fig. D.12 – Checkout**
+
+![Checkout](screenshots/full/13_Buyer_Checkout.png)
+
+**Fig. D.13 – Wishlist**
+
+![Wishlist](screenshots/full/14_Buyer_Wishlist.png)
+
+**Fig. D.14 – Order History**
+
+![Order History](screenshots/full/15_Buyer_Order_History.png)
+
+#### Weaver Dashboard
+
+**Fig. D.15 – Weaver Dashboard**
+
+![Weaver Dashboard](screenshots/full/16_Weaver_Dashboard.png)
+
+**Fig. D.16 – Weaver Sarees**
+
+![Weaver Sarees](screenshots/full/17_Weaver_Sarees.png)
+
+**Fig. D.17 – Saree Upload**
+
+![Weaver Upload](screenshots/full/18_Weaver_Upload.png)
+
+**Fig. D.18 – Story Management**
+
+![Weaver Stories](screenshots/full/19_Weaver_Stories.png)
+
+**Fig. D.19 – Story Upload**
+
+![Weaver Story Upload](screenshots/full/20_Weaver_Story_Upload.png)
+
+**Fig. D.20 – Weaver Orders**
+
+![Weaver Orders](screenshots/full/21_Weaver_Orders.png)
+
+**Fig. D.21 – Sales Report**
+
+![Weaver Sales Report](screenshots/full/22_Weaver_Sales_Report.png)
+
+**Fig. D.22 – Pending Approval**
+
+![Weaver Pending](screenshots/full/23_Weaver_Pending.png)
+
+#### Admin Panel
+
+**Fig. D.23 – Admin Dashboard**
+
+![Admin Dashboard](screenshots/full/24_Admin_Dashboard.png)
+
+**Fig. D.24 – Admin Approvals**
+
+![Admin Approvals](screenshots/full/25_Admin_Approvals.png)
+
+**Fig. D.25 – User Management**
+
+![Admin Users](screenshots/full/26_Admin_Users.png)
+
+**Fig. D.26 – Saree Management**
+
+![Admin Sarees](screenshots/full/27_Admin_Sarees.png)
+
+**Fig. D.27 – Order Management**
+
+![Admin Orders](screenshots/full/28_Admin_Orders.png)
+
+**Fig. D.28 – Category Management**
+
+![Admin Categories](screenshots/full/29_Admin_Categories.png)
+
+**Fig. D.29 – Offer Management**
+
+![Admin Offers](screenshots/full/30_Admin_Offers.png)
+
+**Fig. D.30 – Platform Analytics**
+
+![Admin Analytics](screenshots/full/31_Admin_Analytics.png)
+
+**Fig. D.31 – System Report**
+
+![Admin Report](screenshots/full/32_Admin_Report.png)
 
 ---
 <div align="center">

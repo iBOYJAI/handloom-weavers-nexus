@@ -112,6 +112,22 @@ graph TD
 
 ---
 
+## 📸 SCREENSHOTS
+
+Application screens (viewport captures). Full-page screenshots are in `screenshots/full/`; viewport-only in `screenshots/viewport/`. Capture new screens with: `node scripts/capture-screenshots.js` (server must be running).
+
+| Buyer Home | Login | Saree Detail |
+| :---: | :---: | :---: |
+| ![Buyer Home](screenshots/viewport/01_Buyer_Home.png) | ![Login](screenshots/viewport/02_Login.png) | ![Saree Detail](screenshots/viewport/05_Saree_Detail.png) |
+
+| Weaver Dashboard | Admin Dashboard | Platform Analytics |
+| :---: | :---: | :---: |
+| ![Weaver Dashboard](screenshots/viewport/16_Weaver_Dashboard.png) | ![Admin Dashboard](screenshots/viewport/24_Admin_Dashboard.png) | ![Admin Analytics](screenshots/viewport/31_Admin_Analytics.png) |
+
+**More screens:** Story Gallery, Cart, Checkout, Wishlist, Order History, Weaver Sarees/Upload/Stories/Orders, Admin Approvals/Users/Sarees/Orders/Categories/Offers/Report — see `screenshots/full/` and `screenshots/viewport/` or **APPENDIX - D** in [COMPLETE_PROJECT_REPORT.md](COMPLETE_PROJECT_REPORT.md).
+
+---
+
 ## 📂 PROJECT STRUCTURE
 ```text
 Handloom Weavers Nexus/
