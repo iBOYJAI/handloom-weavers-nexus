@@ -14,7 +14,7 @@ Handloom Weavers Nexus is an advanced D2C marketplace designed to connect India'
 ### 💼 Professional Bio
 Jaiganesh D. (iBOY) is the Founder of **iBOY Innovation HUB**, a technology startup focused on building AI-powered SaaS platforms, automation tools, and future-ready digital solutions. He specializes in Full-Stack Development, Artificial Intelligence integration, backend systems, and scalable startup architecture.
 
-He is developing innovative platforms designed to solve real-world problems. His mission is to create impactful, scalable, and intelligent products that empower businesses and individuals through advanced computing and high-efficiency backend development.
+"Innovation isn’t just what you do — it’s who YOU are."
 
 ---
 
@@ -27,11 +27,7 @@ Beyond just a store, we provide a secure and scalable infrastructure for the wea
 
 ---
 
-## 🔮 PROJECT VISION
-Handloom Weavers Nexus is the first step in a larger ecosystem aimed at **Digital Artisan Advocacy**. Our future roadmap includes:
-1. **AI-Driven Quality Control**: Using computer vision to verify authentic weave patterns.
-2. **Blockchain Provenance**: Immutable records of a saree's journey from loom to living room.
-3. **Hyper-Local Logistics**: Automation for rural shipping and fulfillment tracking.
+## 🏛 TECHNICAL ARCHITECTURE
 
 ### Entity Relationship Diagram (ERD - Chen Style)
 ```mermaid
@@ -47,14 +43,71 @@ flowchart TD
     ST --- Attr5((Caption))
 ```
 
-### Data Flow Diagram (DFD Level 1)
+### Advanced User Flow (Buyer Journey)
 ```mermaid
-graph LR
-    User[Buyer/User] -->|Interact| Web[Web App]
-    Weaver[Artisan] -->|Manage| Web
-    Web -->|Data| DB[(MySQL)]
-    Web -->|Auth| Session[Secure Session]
-    Admin[Admin] -->|Review| Web
+sequenceDiagram
+    participant B as Buyer
+    participant W as Web App
+    participant A as Admin
+    participant DB as Database
+
+    B->>W: Browse Home Page
+    W->>DB: Fetch Approved Sarees
+    DB-->>W: List of Sarees
+    B->>W: View Artisan Story
+    W->>DB: Fetch Story Content
+    B->>W: Add to Wishlist/Cart
+    B->>W: Initiate Checkout
+    W->>DB: Verify Stock
+    alt In Stock
+        DB-->>W: Stock Confirmed
+        W->>DB: Create Order & Deduct Qty
+        W-->>B: Order Success!
+    else Out of Stock
+        W-->>B: Error: Item Sold Out
+    end
+```
+
+### Marketplace Workflow (Content Life-cycle)
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: Weaver Creates Saree/Story
+    Draft --> Pending: Submitted for Review
+    Pending --> Reviewing: Admin Audits Content
+    Reviewing --> Approved: Quality Standard Met
+    Reviewing --> Rejected: Refusal with Reason
+    Approved --> Live: Visible to Public
+    Live --> SoldOut: Stock Reaches Zero
+    Rejected --> Draft: Weaver Edits Content
+```
+
+### Platform Sitemap (Map Visualization)
+```mermaid
+graph TD
+    Home[Landing Page] --> Gallery[Artisan Stories]
+    Home --> Shop[Saree Catalog]
+    Home --> Auth[Login / Register]
+    
+    subgraph Buyer_Portal
+        Shop --> Detail[Saree Detail]
+        Detail --> Wishlist[Wishlist Page]
+        Detail --> Cart[Cart Page]
+        Cart --> Checkout[Checkout Flow]
+    end
+    
+    subgraph Weaver_Dashboard
+        Auth --> W_Home[Stats Overview]
+        W_Home --> W_Sarees[Manage Inventory]
+        W_Home --> W_Stories[Manage Stories]
+        W_Home --> W_Orders[Order Reports]
+    end
+    
+    subgraph Admin_Panel
+        Auth --> A_Home[Admin Dashboard]
+        A_Home --> A_Approv[Approval Queue]
+        A_Home --> A_Users[User Roles]
+        A_Home --> A_Analyt[Market Analytics]
+    end
 ```
 
 ---
@@ -82,7 +135,7 @@ Handloom Weavers Nexus/
 ## 🚀 GETTING STARTED
 
 ### Prerequisites
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - MySQL (v8.0 or higher)
 
 ### Installation
@@ -94,8 +147,6 @@ Handloom Weavers Nexus/
 ---
 
 ## 🌐 GITHUB DEPLOYMENT
-To push this project to your own GitHub repository, use the following commands:
-
 ```bash
 git init
 git add .
@@ -112,5 +163,5 @@ git push -u origin main
   <p>This project is licensed under the MIT License. Technical and legal provisions are detailed in the <a href="LICENSE">LICENSE</a> file.</p>
   
   <p><b>Developed by iBOY Innovation HUB</b></p>
-  <p><i>Innovation isn’t just what you do — it’s who YOU are.</i></p>
+  <p><i>Building the future of artisan digital commerce.</i></p>
 </div>
