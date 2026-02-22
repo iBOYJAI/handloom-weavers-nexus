@@ -1,6 +1,11 @@
 # MASTER PROJECT REPORT
 ## Handloom Weavers Nexus: A Scalable D2C Marketplace for Artisan Preservation
 
+**Student:** Selvanayaki G  
+**Roll No:** 23AI122  
+**Guide:** Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.  
+**Institution:** Gobi Arts & Science College, Gobichettipalayam  
+
 ---
 
 ### CONTENTS
@@ -11,7 +16,7 @@
 | **SYNOPSIS** | **ii** |
 | **CHAPTER 1: INTRODUCTION** | **1** |
 | 1.1 ABOUT THE PROJECT | 3 |
-| 1.2 ORGANIZATION PROFILE (iBOY Innovation HUB) | 6 |
+| 1.2 PROJECT & INSTITUTION PROFILE | 6 |
 | 1.3 PROJECT OBJECTIVES & SCOPE | 10 |
 | 1.4 HARDWARE SPECIFICATION | 15 |
 | 1.5 SOFTWARE SPECIFICATION | 18 |
@@ -25,8 +30,8 @@
 | 2.4.3 Operational Feasibility | 43 |
 | 2.4.4 Behavioral Feasibility | 46 |
 | **CHAPTER 3: SYSTEM DESIGN** | **50** |
-| 3.1 SYSTEM ARCHITECTURE (MCR PATTERN) | 52 |
-| 3.2 DATA FLOW DIAGRAMS (Level 0, 1, 2) | 58 |
+| 3.1 SYSTEM ARCHITECTURE (MVC PATTERN) | 52 |
+| 3.2 DATA FLOW DIAGRAMS (Level 0, 1, 2, 3) | 58 |
 | 3.3 E-R DIAGRAM (Chen Notation) | 65 |
 | 3.4 DATABASE DICTIONARY & FILE SPECIFICATION | 72 |
 | 3.5 MODULE SPECIFICATION | 80 |
@@ -51,7 +56,7 @@
 
 The successful completion of this project, **"Handloom Weavers Nexus"**, is the result of collective effort, guidance, and inspiration from many quarters. It is with a deep sense of gratitude that I acknowledge the individuals and organizations who have contributed to the fruition of this project.
 
-First and foremost, I would like to express my sincere gratitude and deep sense of appreciation to my mentors and colleagues at **iBOY Innovation HUB**. Their constant support, technical guidance, and unwavering encouragement have been instrumental in traversing the complex architectural landscapes of full-stack engineering. Their expertise in AI-powered SaaS and automation provided the conceptual framework upon which this platform was built.
+First and foremost, I would like to express my sincere gratitude to my project guide **Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.**, for his constant support, technical guidance, and encouragement throughout the development of this project. I also thank the faculty and management of **Gobi Arts & Science College, Gobichettipalayam**, for providing the resources and environment necessary for this work.
 
 I am profoundly grateful to the weaving community of India. Their unparalleled craftsmanship, patience, and cultural resilience serve as the core inspiration for this platform. This project is, in every sense, a tribute to their legacy, and I am honored to have had the opportunity to build a bridge that connects their ancient art with the digital modern world.
 
@@ -67,7 +72,7 @@ Finally, I would like to thank my family and friends for their constant motivati
 
 Built using the modern **Node.js, Express, and MySQL** stack, the platform distinguishes itself through a premium, "vibey" aesthetic—balancing the raw beauty of handloom crafts with the sleekness of modern digital design. The core innovation of the system is the **"Artisan Stories" module**, a sophisticated multi-media engine that allows weavers to document their process through videos and images. This "narrative layer" adds immense value to the products, transforming them from simple commodities into pieces of living history.
 
-The system is architected following the **Model-Controller-Route (MCR)** pattern, ensuring clear separation of concerns and high maintainability. Key features include a managed marketplace with admin approval workflows, a responsive and intuitive weaver dashboard, and a feature-rich buyer interface with wishlist, cart, and high-speed search capabilities. By bridging the emotional and economic gap between the weaver and the buyer, Handloom Weavers Nexus serves as a blueprint for "Digital Artisan Advocacy," combining the convenience of modern e-commerce with the soul of traditional craftsmanship.
+The system is architected following the **Model-View-Controller (MVC)** pattern, ensuring clear separation of concerns and high maintainability. Key features include a managed marketplace with admin approval workflows, a responsive and intuitive weaver dashboard, and a feature-rich buyer interface with wishlist, cart, and high-speed search capabilities. By bridging the emotional and economic gap between the weaver and the buyer, Handloom Weavers Nexus serves as a blueprint for "Digital Artisan Advocacy," combining the convenience of modern e-commerce with the soul of traditional craftsmanship.
 
 ---
 
@@ -81,17 +86,11 @@ The project encompasses a wide array of functional domains, including secure aut
 
 The user experience is designed to be immersive. Buyers do not just browse sarees; they encounter the weavers behind them. Each saree is linked to the artisan's profile and their specific "Craft Story," creating a transparent and engaging shopping journey. From a technical perspective, the platform is built for speed and scalability, utilizing vanilla technologies to ensure a lightweight and highly performant footprint.
 
-### 1.2 ORGANIZATION PROFILE (iBOY Innovation HUB)
+### 1.2 PROJECT & INSTITUTION PROFILE
 
-**iBOY Innovation HUB** is a dynamic technology startup dedicated to engineering the future of digital solutions. Under the visionary leadership of **Jaiganesh D. (iBOY)**, the organization has established itself as a hub for AI-powered SaaS platforms, automation frameworks, and innovative web ecosystems. 
+This project, **Handloom Weavers Nexus**, is an academic project undertaken at **Gobi Arts & Science College, Gobichettipalayam**. It was developed by **Selvanayaki G** (Roll No: 23AI122) under the guidance of **Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.**
 
-The organization's mission is defined by its core motto: *"Innovation isn’t just what you do — it’s who YOU are."* This philosophy drives iBOY Innovation HUB to build products that are not just functional but transformative. The company focuses on several key areas of technological advancement:
-- **Scalable Backend Systems**: Architecting high-concurrency environments for global applications.
-- **AI & Automation**: Integrating intelligent agents and machine learning to optimize business processes.
-- **Digital Legacy Projects**: Utilizing tech to preserve cultural and artisan heritage in the modern age.
-- **Full-Stack Performance**: Ensuring that every user interaction is fluid, secure, and impactful.
-
-Handloom Weavers Nexus is a flagship project of iBOY Innovation HUB, showcasing the organization's ability to combine social impact with high-end engineering.
+The project demonstrates the application of full-stack web technologies, database design, and system analysis to build a Direct-to-Consumer (D2C) marketplace that connects handloom weavers with buyers while preserving artisan identity and cultural heritage through the "Stories" feature.
 
 ### 1.3 PROJECT OBJECTIVES & SCOPE
 
@@ -113,24 +112,22 @@ The scope of Handloom Weavers Nexus extends across the entire e-commerce lifecyc
 
 ### 1.4 HARDWARE SPECIFICATION
 
-The development and deployment of a high-media platform like Handloom Weavers Nexus require a specialized hardware environment capable of handling intensive database queries and media processing.
+The development and testing of Handloom Weavers Nexus was carried out on the following hardware configuration.
 
 #### Development System Details:
-- **Processor (CPU)**: AMD Ryzen™ 9 5900X (12 Cores / 24 Threads, 3.7GHz Base, 4.8GHz Boost). This allows for rapid compilation and efficient multi-tasking across developer tools.
-- **Memory (RAM)**: 64 GB G.Skill Trident Z Neo DDR4-3600MHz. High RAM capacity is crucial for running concurrent local servers, database instances, and visual assets without bottlenecks.
-- **Primary Storage**: 2 TB Samsung 980 Pro PCIe 4.0 NVMe SSD. Ensures near-instantaneous file I/O operations for thousands of image assets.
-- **Graphic Processing (GPU)**: NVIDIA GeForce RTX™ 3080 10GB. Utilized for hardware-accelerated image optimization and UI rendering.
-- **Display**: Dual 27-inch 4K Color-Accurate Monitors (IPS Panels) for meticulous UI/UX design and asset verification.
+- **Processor (CPU)**: Intel Core i3
+- **Memory (RAM)**: 4 GB
+- **Primary Storage**: 50 GB
+- **Operating System**: Windows 10 / Windows 11
 
-#### Recommended Deployment Server (VPS/Cloud):
-- **CPU**: 4 Core vCPU (Intel Xeon or AMD EPYC).
-- **RAM**: 16 GB DDR4 ECC RAM.
-- **Storage**: 100 GB SSD (Scalable for media uploads).
-- **Network**: 1 Gbps Symmetric Uplink for high-bandwidth media delivery.
+This configuration is sufficient for running the Node.js server, MySQL database, and the web application for development and demonstration purposes.
 
 ### 1.5 SOFTWARE SPECIFICATION
 
 The platform utilizes a modern, performance-optimized "Vanilla Plus" stack, prioritizing core technologies over heavy frameworks to ensure maximum flexibility and speed.
+
+#### Operating System:
+- **Windows 10 / Windows 11**: Development and testing environment.
 
 #### Backend Technologies:
 - **Node.js (v18.17.0 LTS)**: The foundational runtime for executing JavaScript on the server side.
@@ -206,7 +203,7 @@ A thorough system study was conducted through field research and user persona ma
 A project of this scale requires a rigorous multi-dimensional feasibility analysis to ensure long-term sustainability.
 
 #### 2.4.1 Technical Feasibility:
-The project is built using a stack that is mature, stable, and highly documented. Node.js provides the asynchronous event-loop architecture necessary for high-speed I/O (important for media delivery). MySQL ensures strict data integrity for orders and transactions. Since the iBOY Innovation HUB team has extensive experience in these technologies, technical risk is minimal. The system is also designed to be "offline-resilient," ensuring basic functionality even in low-bandwidth rural environments.
+The project is built using a stack that is mature, stable, and highly documented. Node.js provides the asynchronous event-loop architecture necessary for high-speed I/O (important for media delivery). MySQL ensures strict data integrity for orders and transactions. The technologies used are mature and well-documented; technical risk is minimal. The system is also designed to be "offline-resilient," ensuring basic functionality even in low-bandwidth rural environments.
 
 #### 2.4.2 Economic Feasibility:
 Economically, the project is a "Lean Startup" model. By utilizing open-source software (Node.js, MySQL, Linux), we eliminate licensing costs. The primary investment is in skilled development hours. For the weaver, the platform is "Free-to-Enter," removing the financial barrier to entry. The system's ability to drive a 40%+ increase in weaver income makes it economically transformative for rural clusters.
@@ -224,21 +221,21 @@ Artisans are traditionally skeptical of tech "platforms". However, by positionin
 
 ## CHAPTER 3: SYSTEM DESIGN
 
-### 3.1 SYSTEM ARCHITECTURE (MCR PATTERN)
+### 3.1 SYSTEM ARCHITECTURE (MVC PATTERN)
 
-The architecture of **Handloom Weavers Nexus** is rooted in the **Model-Controller-Route (MCR)** design pattern. This engineering choice was made to ensure that the system remains modular, testable, and horizontally scalable. By separating the logic into discrete layers, we can update the user interface without affecting the database schema, and vice-versa.
+The architecture of **Handloom Weavers Nexus** is rooted in the **Model-View-Controller (MVC)** design pattern. This engineering choice was made to ensure that the system remains modular, testable, and horizontally scalable. By separating the logic into discrete layers, we can update the user interface without affecting the database schema, and vice-versa.
 
-#### 1. The Route Layer (Express Router):
-This is the entry point for all HTTP requests. It acts as the "Traffic Controller," directing incoming traffic from the client-side `api.js` to the appropriate functional controllers. The routes are protected by **Middleware Guards**, which verify whether a user is authenticated and has the correct role (Admin/Weaver/Buyer) to access specific resources.
+#### 1. The Model Layer (Data):
+Models represent the data layer. They are built using structured SQL queries that interact with the MySQL database. We utilize the `mysql2` driver with **Prepared Statements** to prevent SQL injection attacks. This layer abstracts the database complexities, providing the controllers with clean, predictable data objects.
 
-#### 2. The Controller Layer (Business Logic):
-The controllers are the "Brains" of the application. They receive data from the routes, apply business rules (such as validating stock levels or formatting image paths), and interact with the data models. For example, the `OrderController` manages the complex logic of checking stock, creating transaction records, and updating inventory status in a single atomic sequence.
+#### 2. The View Layer (Presentation):
+The View is the presentation layer. The core layout is served as HTML from the `public` folder, while data is injected dynamically using client-side JavaScript. This ensures a fast, app-like experience for the buyer while maintaining the SEO benefits of static pages.
 
-#### 3. The Model Layer (Data Access):
-Our models are built using structured SQL queries that interact with the MySQL database. We utilize the `mysql2` driver with **Prepared Statements** to prevent SQL injection attacks. This layer abstracts the database complexities, providing the controllers with clean, predictable data objects.
+#### 3. The Controller Layer (Business Logic):
+The controllers are the "Brains" of the application. They receive requests from the routes, apply business rules (such as validating stock levels or formatting image paths), and interact with the models. For example, the order controller manages the complex logic of checking stock, creating transaction records, and updating inventory status in a single atomic sequence.
 
-#### 4. The View Layer (Public Assets):
-Unlike traditional SSR (Server-Side Rendering) apps, we utilize a hybrid approach. The core layout is served as HTML, while data is injected dynamically using client-side JavaScript. This ensures a fast, app-like experience for the buyer while maintaining the SEO benefits of static pages.
+#### 4. The Route Layer (Express Router):
+Routes act as the entry point for all HTTP requests, directing incoming traffic from the client-side `api.js` to the appropriate controllers. The routes are protected by **Middleware Guards**, which verify whether a user is authenticated and has the correct role (Admin/Weaver/Buyer) to access specific resources.
 
 ### 3.2 DATA FLOW DIAGRAMS (DFD)
 
@@ -260,10 +257,11 @@ graph LR
 #### DFD Level 1 (Process Breakdown):
 This level decomposes the system into its primary subsystems:
 1. **P1: Authentication Subsystem**: Validates credentials and manages session state.
-2. **P2: Inventory Subsystem**: Handles the lifecycle of Saree listings from upload to sale.
-3. **P3: Story Subsystem**: A dedicated pipeline for multi-media artisan narratives.
-4. **P4: Governance Subsystem**: Enables admins to audit, approve, or reject content.
-5. **P5: Transaction Subsystem**: Manages the cart, wishlist, and final checkout sequences.
+2. **P2: Inventory Subsystem**: Handles the lifecycle of Saree listings (sarees, images, variants) from upload to sale.
+3. **P3: Story Subsystem**: A dedicated pipeline for multi-media artisan narratives (weaver_stories).
+4. **P4: Governance Subsystem**: Enables admins to audit, approve, or reject content (saree_approvals, story_approvals).
+5. **P5: Transaction Subsystem**: Manages the cart, orders, and final checkout sequences.
+6. **P6: Wishlist & Reviews Subsystem**: Manages wishlist entries and buyer reviews for sarees.
 
 #### DFD Level 2 (Order Fulfillment Detail):
 Captures the granular logic required to process a sale securely.
@@ -279,50 +277,129 @@ graph TD
     S3 --> S4[Clear Client-Side Cart]
 ```
 
-### 3.3 E-R DIAGRAM (Chen Notation Style)
+#### DFD Level 3 (Sub-Process Detail):
+Level 3 decomposes key processes into finer sub-flows.
 
-The Entity-Relationship Diagram represents the logical blueprint of our database. Following the **Chen Notation**, we use Rectangles for Entities, Ovals for Attributes (with underlined names for Primary Keys), and Diamonds for Relationships.
+**3.1 Saree Upload and Approval Sub-flow:**
+```mermaid
+graph LR
+    W[Weaver] -->|Upload Saree| P2A[Create Saree Record]
+    P2A --> P2B[Upload Images]
+    P2B --> P2C[Pending Approval]
+    P2C --> Admin[Admin Reviews]
+    Admin -->|Approve| Live[Live Listing]
+    Admin -->|Reject| Rej[Rejection Reason to Weaver]
+```
+
+**3.2 Story Upload and Approval Sub-flow:**
+```mermaid
+graph LR
+    W[Weaver] -->|Upload Media| P3A[Create Story Record]
+    P3A --> P3B[Pending Approval]
+    P3B --> Admin[Admin Reviews]
+    Admin -->|Approve| Visible[Story Visible]
+    Admin -->|Reject| Rej[Rejection to Weaver]
+```
+
+**3.3 Cart-to-Checkout Sub-flow:**
+```mermaid
+graph TD
+    Cart[Cart Items] --> Validate[Validate Stock & Address]
+    Validate --> ApplyOffer[Apply Offer if any]
+    ApplyOffer --> CreateOrder[Create Order + Order Items]
+    CreateOrder --> DeductStock[Deduct Stock]
+    DeductStock --> Notify[Notify Weaver]
+    Notify --> ClearCart[Clear Cart]
+```
+
+### 3.3 E-R DIAGRAM (Chen Notation)
+
+The Entity-Relationship Diagram represents the logical blueprint of our database. In **Chen Notation**:
+- **Entity**: Rectangle
+- **Relationship**: Diamond
+- **Attribute**: Oval
+- **Key Attribute**: Oval with underline (shown as "PK" in labels below)
 
 ```mermaid
-flowchart TD
-    %% Entities
-    U[USER]
-    S[SAREE]
-    ST[STORY]
-    C[CATEGORY]
-    O[ORDER]
-
-    %% Relationships (Diamonds)
-    U ---|Diamond| R1{REGISTERED_AS}
-    U ---|Diamond| R2{AUTHORS} --- ST
-    U ---|Diamond| R3{PROVIDES} --- S
-    S ---|Diamond| R4{CLASSIFIED_IN} --- C
-    U ---|Diamond| R5{PLACES} --- O
-    O ---|Diamond| R6{CONTAINS} --- S
-
-    %% Attributes (Ovals)
-    U --- UA1((UserID PK))
-    U --- UA2((Email))
-    U --- UA3((Role))
-    S --- SA1((SareeID PK))
-    S --- SA2((Title))
-    S --- SA3((Price))
-    ST --- STA1((StoryID PK))
-    ST --- STA2((MediaType))
-    O --- OA1((OrderID PK))
+flowchart LR
+    U[USER] --- R1{PROVIDES} --- S[SAREE]
+    S --- R2{CLASSIFIED_IN} --- C[saree_categories]
+    S --- R3{HAS_IMAGE} --- I[saree_images]
+    S --- R4{HAS_VARIANT} --- V[saree_variants]
+    S --- R5{APPROVED_BY} --- A1[saree_approvals]
+    U --- R6{PLACES} --- O[ORDER]
+    O --- R7{CONTAINS} --- OI[order_items]
+    OI --- R8{CUSTOMIZES} --- OC[order_customizations]
+    U --- R9{IN_CART} --- CI[cart_items]
+    CI --- S
+    U --- R10{AUTHORS} --- WS[weaver_stories]
+    WS --- R11{APPROVED_BY} --- A2[story_approvals]
+    U --- R12{WISHLISTS} --- WL[wishlist]
+    WL --- S
+    U --- R13{REVIEWS} --- RV[reviews]
+    RV --- S
+    U --- R14{RECEIVES} --- N[notifications]
+    O --- R15{APPLIES} --- OF[offers]
 ```
+
+*Diagram legend: [Entity] = Rectangle; {Relationship} = Diamond; Attributes and Key Attributes are listed in the table below.*
+
+#### Key Attributes (Ovals – Primary Keys underlined in design)
+
+| Entity | Key Attribute (PK) | Other Attributes |
+| :--- | :--- | :--- |
+| USER | id | name, email, password_hash, role |
+| SAREE | id | weaver_id, category_id, title, price, stock |
+| saree_categories | id | name, slug |
+| saree_images | id | saree_id, file_path, is_primary |
+| saree_variants | id | saree_id, color_name, design_name, stock |
+| saree_approvals | id | saree_id, status, admin_id |
+| ORDER | id | buyer_id, total_amount, status, address |
+| order_items | id | order_id, saree_id, quantity, price_at_purchase |
+| order_customizations | id | order_item_id, blouse_color |
+| cart_items | id | user_id, saree_id, quantity |
+| weaver_stories | id | weaver_id, caption, media_path, is_approved |
+| story_approvals | id | story_id, status, admin_id |
+| wishlist | id | user_id, saree_id |
+| reviews | id | buyer_id, saree_id, rating, comment |
+| notifications | id | user_id, message, type |
+| offers | id | title, type, value, start_date, end_date |
 
 ### 3.4 DATABASE DICTIONARY & FILE SPECIFICATION
 
 This section details the physical design of the database, ensuring ACIDity (Atomicity, Consistency, Isolation, Durability).
 
+#### Complete Database Table List (All Tables)
+
+| # | Table Name | Purpose |
+| :---: | :--- | :--- |
+| 1 | `users` | User accounts (buyer, weaver, admin); RBAC and profile data. |
+| 2 | `sessions` | Express session store for authenticated sessions. |
+| 3 | `saree_categories` | Saree category taxonomy (e.g. Kanchipuram, Banarasi). |
+| 4 | `offers` | Discounts and promotions (percentage, fixed, free shipping, BOGO). |
+| 5 | `sarees` | Product listings; weaver_id, category_id, price, stock, approval. |
+| 6 | `saree_images` | Product images; file_path, is_primary per saree. |
+| 7 | `saree_variants` | Color/design variants; stock and price_adjustment per variant. |
+| 8 | `saree_approvals` | Admin approval workflow for sarees (pending/approved/rejected). |
+| 9 | `orders` | Purchase orders; buyer_id, total_amount, status, address. |
+| 10 | `order_items` | Line items per order; saree_id, quantity, price_at_purchase. |
+| 11 | `order_customizations` | Blouse color and custom design per order item. |
+| 12 | `cart_items` | Shopping cart; user_id, saree_id, quantity. |
+| 13 | `weaver_stories` | Artisan stories (media_path, media_type, caption). |
+| 14 | `story_approvals` | Admin approval workflow for weaver stories. |
+| 15 | `notifications` | User notifications (message, type, is_read). |
+| 16 | `reviews` | Buyer reviews (rating, comment) per saree. |
+| 17 | `wishlist` | User wishlists; user_id, saree_id. |
+
+#### Sample Table Specifications
+
 #### Table 1: `users`
 | Field | Type | Constraint | Purpose |
 | :--- | :--- | :--- | :--- |
 | `id` | INT | PRIMARY KEY, AUTO_INC | Unique user identifier. |
-| `name` | VARCHAR(255) | NOT NULL | Personal or business name. |
+| `name` | VARCHAR(100) | NOT NULL | Personal or business name. |
 | `email` | VARCHAR(255) | UNIQUE, NOT NULL | Login credential. |
-| `password` | VARCHAR(255) | NOT NULL | Salt-hashed secret. |
+| `password_hash` | VARCHAR(255) | NOT NULL | Salt-hashed secret. |
 | `role` | ENUM | default 'buyer' | Role-Based Access Control. |
 
 #### Table 2: `sarees`
@@ -330,17 +407,18 @@ This section details the physical design of the database, ensuring ACIDity (Atom
 | :--- | :--- | :--- | :--- |
 | `id` | INT | PRIMARY KEY, AUTO_INC | Product identifier. |
 | `weaver_id` | INT | FOREIGN KEY (users.id) | Link to producing artisan. |
-| `title` | VARCHAR(255) | NOT NULL | Marketable name. |
+| `category_id` | INT | FOREIGN KEY (saree_categories.id) | Product category. |
+| `title` | VARCHAR(100) | NOT NULL | Marketable name. |
 | `price` | DECIMAL(10,2) | NOT NULL | Sale price in INR. |
-| `status` | ENUM | default 'pending' | Approval lifecycle. |
+| `stock` | INT | NOT NULL, default 0 | Available quantity. |
 
 #### Table 3: `weaver_stories`
 | Field | Type | Constraint | Purpose |
 | :--- | :--- | :--- | :--- |
 | `id` | INT | PRIMARY KEY, AUTO_INC | Story identifier. |
 | `weaver_id` | INT | FOREIGN KEY (users.id) | Author identification. |
-| `media_paths` | TEXT | NOT NULL | JSON-encoded array of media URLs. |
-| `is_approved`| BOOLEAN | default FALSE | Visibility toggle. |
+| `media_path` / `media_paths` | VARCHAR(500) / TEXT | NOT NULL | Media file path(s). |
+| `is_approved` | TINYINT(1) | default 0 | Visibility toggle. |
 
 ### 3.5 MODULE SPECIFICATION
 
@@ -407,7 +485,7 @@ UAT was conducted with a pool of "Beta Weavers" to test behavioral feasibility. 
 
 ### 5.1 PROJECT CONCLUSION
 
-**Handloom Weavers Nexus** has evolved from a conceptual marketplace into a high-performance, socially impactful platform. By leveraging the latest in full-stack engineering at **iBOY Innovation HUB**, we have created a system that doesn't just sell sarees; it empowers a community. The project successfully meets all its engineering goals—scalability, security, and performance—while achieving its core mission: giving India's weavers a digital platform as vibrant and enduring as the fabrics they create.
+**Handloom Weavers Nexus** has evolved from a conceptual marketplace into a high-performance, socially impactful platform. Developed as an academic project at **Gobi Arts & Science College, Gobichettipalayam**, it demonstrates a system that doesn't just sell sarees; it empowers a community. The project successfully meets all its engineering goals—scalability, security, and performance—while achieving its core mission: giving India's weavers a digital platform as vibrant and enduring as the fabrics they create.
 
 ### 5.2 SUGGESTIONS FOR FUTURE WORK
 
@@ -468,6 +546,7 @@ function injectSidebar() {
 
 ---
 <div align="center">
-  <p><b>Developed by iBOY Innovation HUB</b></p>
-  <p><i>Innovation isn’t just what you do — it’s who YOU are.</i></p>
+  <p><b>Developed by Selvanayaki G</b></p>
+  <p>Roll No: 23AI122 | Guide: Dr. M. Ramalingam, M.Sc.(CS)., M.C.A., Ph.D.</p>
+  <p>Gobi Arts & Science College, Gobichettipalayam</p>
 </div>

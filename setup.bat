@@ -1,6 +1,7 @@
 @echo off
 echo Handloom Weavers Nexus - Environment Setup
 echo =========================================
+echo Student: Selvanayaki G ^| Gobi Arts ^& Science College, Gobichettipalayam
 echo.
 echo [1/3] Installing dependencies...
 call npm install
