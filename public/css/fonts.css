@@ -5,21 +5,21 @@
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('/assets/fonts/Playfair_Display/PlayfairDisplay-Regular.ttf') format('truetype');
+    src: url('/assets/fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf') format('truetype');
 }
 @font-face {
     font-family: 'Playfair Display';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('/assets/fonts/Playfair_Display/PlayfairDisplay-Bold.ttf') format('truetype');
+    src: url('/assets/fonts/Playfair_Display/static/PlayfairDisplay-Bold.ttf') format('truetype');
 }
 @font-face {
     font-family: 'Playfair Display';
     font-style: italic;
     font-weight: 400;
     font-display: swap;
-    src: url('/assets/fonts/Playfair_Display/PlayfairDisplay-Italic.ttf') format('truetype');
+    src: url('/assets/fonts/Playfair_Display/static/PlayfairDisplay-Italic.ttf') format('truetype');
 }
 
 /* Poppins - from public/assets/fonts/Poppins/ */
