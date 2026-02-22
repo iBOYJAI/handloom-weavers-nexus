@@ -18,7 +18,20 @@ He is developing innovative platforms designed to solve real-world problems. His
 
 ---
 
-## 🏛 TECHNICAL ARCHITECTURE
+## 🛡 WHY HANDLOOM WEAVERS NEXUS?
+Beyond just a store, we provide a secure and scalable infrastructure for the weaving ecosystem:
+- **Premium Performance**: Built with Vanilla JS and CSS for near-instant load times.
+- **Security First**: PBKDF2-equivalent hashing, session guarding, and SQL injection prevention.
+- **Narrative Depth**: Integrated multi-media engine to bridge the emotional gap between weaver and buyer.
+- **Administrative Transparency**: Comprehensive auditing loops for all marketplace activities.
+
+---
+
+## 🔮 PROJECT VISION
+Handloom Weavers Nexus is the first step in a larger ecosystem aimed at **Digital Artisan Advocacy**. Our future roadmap includes:
+1. **AI-Driven Quality Control**: Using computer vision to verify authentic weave patterns.
+2. **Blockchain Provenance**: Immutable records of a saree's journey from loom to living room.
+3. **Hyper-Local Logistics**: Automation for rural shipping and fulfillment tracking.
 
 ### Entity Relationship Diagram (ERD - Chen Style)
 ```mermaid
