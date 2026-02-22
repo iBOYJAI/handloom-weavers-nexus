@@ -93,7 +93,7 @@
     /* Layout */
     --header-height: 64px;
     --sidebar-width: 256px;
-    --sidebar-collapsed-width: 64px;
+    --sidebar-collapsed-width: 72px;
     --footer-height: 80px;
 
     /* Z-index layers */

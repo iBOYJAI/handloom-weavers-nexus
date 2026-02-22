@@ -286,8 +286,8 @@ const components = {
         }).join('')}
                 </nav>
             </aside>
-            <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
-                <img src="/assets/icons/Notion-Icons/Regular/svg/ni-sidebar.svg" style="width: 20px; height: 20px;">
+            <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Close sidebar" title="Close sidebar">
+                <span class="sidebar-toggle-arrow" aria-hidden="true">&lt;</span>
             </button>
         `;
 
@@ -296,6 +296,16 @@ const components = {
         const mainContent = document.querySelector('.main-content');
         if (mainContent) {
             mainContent.classList.remove('no-sidebar');
+        }
+
+        // Restore collapsed state from localStorage
+        const sidebar = document.getElementById('sidebar');
+        const savedCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+        if (sidebar && savedCollapsed) {
+            sidebar.classList.add('sidebar--collapsed');
+            if (mainContent) mainContent.classList.add('sidebar-collapsed');
+            const shell = document.querySelector('.app-shell');
+            if (shell) shell.classList.add('sidebar-collapsed');
         }
 
         this.initSidebarToggle();
@@ -330,10 +340,14 @@ const components = {
 
         if (!sidebar || !toggle) return;
 
-        // Check initial state for toggle icon rotation
-        if (sidebar.classList.contains('sidebar--collapsed')) {
-            toggle.style.transform = 'rotate(180deg)';
-        }
+        // Set initial arrow and label: collapsed = ">" (open), expanded = "<" (close)
+        const setToggleState = (collapsed) => {
+            const arrow = toggle.querySelector('.sidebar-toggle-arrow');
+            if (arrow) arrow.textContent = collapsed ? '>' : '<';
+            toggle.setAttribute('aria-label', collapsed ? 'Open sidebar' : 'Close sidebar');
+            toggle.setAttribute('title', collapsed ? 'Open sidebar' : 'Close sidebar');
+        };
+        setToggleState(sidebar.classList.contains('sidebar--collapsed'));
 
         // Check if mobile
         const isMobile = window.innerWidth <= 768;
@@ -367,8 +381,7 @@ const components = {
                     mainContent.classList.toggle('sidebar-collapsed', collapsed);
                 }
 
-                // Rotate toggle icon
-                toggle.style.transform = collapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+                setToggleState(collapsed);
 
                 // Persist state
                 localStorage.setItem('sidebar-collapsed', collapsed);
