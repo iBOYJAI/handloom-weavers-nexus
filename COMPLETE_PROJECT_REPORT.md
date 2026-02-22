@@ -597,12 +597,211 @@ This section details the physical design of the database, ensuring ACIDity (Atom
 
 ### 3.5 MODULE SPECIFICATION
 
-The software is built on a "Modular Engine" philosophy. Each module is self-contained yet communicative.
+The software is built on a **Modular Engine** philosophy. Each module is self-contained, with clear boundaries and well-defined interfaces, yet communicates via shared session, routes, and data models. Below, every core module is fully defined and explained.
 
-1. **The Auth Vault**: Manages session instantiation, cookie injection, and password validation. It uses a "Safe-Fail" mechanism where all unauthorized redirects point back to the Home page rather than the Login page to prevent "Auth Walling" for new users.
-2. **The Media Processor**: Uses `Multer` to intercept file buffers, sanitize filenames with unique timestamps (to prevent name collisions), and store them in role-specific directory structures (`/uploads/sarees/` vs `/uploads/stories/`).
-3. **The Analytics Processor**: Queries the `orders` and `order_items` tables to generate real-time metrics. It uses SQL aggregate functions (`SUM`, `COUNT`) to provide weavers with insights into their top-selling sarees and monthly revenue trends.
-4. **The UI Component Engine**: A custom JavaScript library (`components.js`) that dynamically injects the Header, Sidebar, and Footer based on the user's current session. This ensures that the interface "transforms" seamlessly when a weaver logs in.
+---
+
+#### Module 1: Authentication (Auth Vault)
+
+**Purpose:** To manage user identity, session lifecycle, and secure access to the application.
+
+**Components:**
+- **Routes:** `routes/auth.routes.js` — exposes `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`.
+- **Controller:** `controllers/auth.controller.js` — implements `register`, `login`, `logout`, `getMe`.
+- **Middleware:** `middleware/auth.js` — `requireAuth` checks for `req.session.userId`; for API requests returns `401 JSON`, for page requests redirects to `/pages/login.html`.
+- **Session store:** `server.js` configures `express-session` with `express-mysql-session`; session data is persisted in the `sessions` table; cookie name `session_cookie_name`, `maxAge` 24 hours, `httpOnly`, `sameSite: 'lax'`.
+
+**Behaviour:**
+- **Registration:** Validates name (3–60 chars), email (format), password (8–64 chars), role (`buyer` or `weaver`). Uses **bcrypt** to hash password (10 rounds), inserts into `users` via `UserModel.create`. Returns `201` with `userId` and `role`.
+- **Login:** Finds user by email, compares password with `bcrypt.compare`. If suspended, returns `403`. On success, sets `req.session.userId`, `role`, `email`, `name`, `is_approved` and calls `req.session.save`. Response includes `redirectTo`: buyer → buyer-home; weaver (approved) → weaver-dashboard; weaver (pending) → weaver-pending; admin → admin-dashboard.
+- **Safe-Fail:** Unauthorized page access redirects to **Home** (`/pages/buyer-home.html`), not Login, to avoid "Auth Walling" for new visitors. API calls receive `401` with `{ success: false, message: 'Not authenticated' }`.
+- **getMe:** Returns current user profile (id, name, email, role, region, phone, address, avatar, isApproved) for the session user; used by the front-end to render header/sidebar.
+
+**Data flow:** Client → `POST /api/auth/login` → AuthController.login → UserModel.findByEmail, bcrypt.compare → session save → JSON with redirectTo. Protected routes later use `requireAuth` and optionally role middleware.
+
+---
+
+#### Module 2: Role & Access Control (RBAC)
+
+**Purpose:** To restrict API and page access by user role and, for weavers, approval status.
+
+**Components:**
+- **Middleware:** `middleware/roles.js` — `requireRole(...allowedRoles)` and `requireWeaverApproved`.
+- **Usage:** Applied in route files (e.g. `requireRole('admin')` for admin routes, `requireWeaverApproved` for weaver routes).
+
+**Behaviour:**
+- **requireRole:** Ensures `req.session` exists and `userId` is set; reads `req.session.role` (case-insensitive). If role is not in `allowedRoles`, returns `403` with `{ success: false, message: 'Insufficient permissions' }`. Used for admin-only and buyer/weaver-specific routes.
+- **requireWeaverApproved:** Allows `admin` to access weaver routes; otherwise requires role `weaver`. Does not block unapproved weavers at middleware level (approval state is enforced in weaver controller/pages; unapproved weavers see weaver-pending and limited actions).
+
+**Data flow:** Request → requireAuth → requireRole / requireWeaverApproved → next() or 403. Order of middleware in `server.js` ensures public routes (e.g. `/api/categories`, `/api/sarees`, `/api/auth/*`) are mounted before protected ones.
+
+---
+
+#### Module 3: Media Processor (Upload Engine)
+
+**Purpose:** To accept, validate, and store file uploads for saree images, weaver stories (image/video), and user avatars.
+
+**Components:**
+- **Middleware:** `middleware/upload.js` — uses **Multer** with three disk storage configs and one error handler.
+- **Directories:** Ensures `uploads/sarees`, `uploads/stories`, `uploads/avatars` exist at startup.
+
+**Behaviour:**
+- **Saree images:** `uploadSareeImages` — destination `uploads/sarees/`; filename `saree-{timestamp}-{random}.{ext}`; allowed MIME: `image/jpeg`, `image/jpg`, `image/png`, `image/webp`; max file size 5MB (configurable via `UPLOAD_MAX_IMAGE_SIZE`). Used in weaver routes as `uploadSareeImages.array('images', 5)`.
+- **Story media:** `uploadStoryMedia` — destination `uploads/stories/`; filename `story-{timestamp}-{random}.{ext}`; allowed MIME: same images plus `video/mp4`, `video/webm`; max file size 50MB (configurable via `UPLOAD_MAX_VIDEO_SIZE`). Used as `uploadStoryMedia.array('media', 5)`.
+- **Avatar:** `uploadAvatar` — destination `uploads/avatars/`; filename `avatar-{timestamp}-{random}.{ext}`; same image filter and 5MB limit.
+- **handleUploadError:** Catches Multer errors (e.g. `LIMIT_FILE_SIZE`) and returns `400` JSON with a clear message so the API never crashes on invalid uploads.
+
+**Data flow:** Multipart request → Multer middleware → file filter + size check → disk write → `req.files` populated → controller reads paths and saves to DB (`saree_images`, `weaver_stories`, or `users.avatar`). Static serving via `app.use('/uploads', express.static(...))`.
+
+---
+
+#### Module 4: Public Catalog (Guest & Buyer Browsing)
+
+**Purpose:** To serve saree listing, search, saree detail, and weaver stories to all users (including unauthenticated guests).
+
+**Components:**
+- **Routes:** `routes/public.routes.js` — mounted under `/api`; no auth middleware. Endpoints: `GET /api/sarees`, `GET /api/sarees/search`, `GET /api/sarees/:id`, `GET /api/stories`, `GET /api/stories/:id`.
+- **Controller:** `controllers/buyer.controller.js` — methods `getSarees`, `searchSarees`, `getSareeDetail`, `getApprovedStories`, `getStoryDetail`.
+- **Models:** `saree.model.js`, and related queries for categories, weaver names, primary image, variants; story model for approved stories only.
+
+**Behaviour:**
+- **getSarees:** Returns approved, active sarees with category and weaver info; supports pagination/limit; used by buyer-home and listing pages.
+- **searchSarees:** Full-text or filtered search on title/description; returns matching sarees with primary image and weaver name; used by global search suggestions and search results page.
+- **getSareeDetail:** Single saree by id with images, variants, category, weaver; only approved sarees; used by saree-detail page.
+- **getApprovedStories / getStoryDetail:** Only stories with `is_approved = 1`; used by story gallery and story-detail pages.
+
+**Data flow:** Browser or API client → GET /api/sarees (or search, :id, stories) → BuyerController → Saree/Story models (approved only) → JSON. No session required.
+
+---
+
+#### Module 5: Buyer Module (Cart, Orders, Wishlist)
+
+**Purpose:** To manage shopping cart, order placement, order history, and wishlist for buyers (and weavers/admins when acting as buyers).
+
+**Components:**
+- **Routes:** `routes/buyer.routes.js` — all under `/api`; middleware chain: `requireAuth`, `requireRole('buyer','admin','weaver')`. Endpoints: cart (add, get, update, remove), orders (create, list), wishlist (toggle, get). Dedicated `routes/wishlist.routes.js` for wishlist API under `/api/wishlist`.
+- **Controller:** `controllers/buyer.controller.js` — cart CRUD, createOrder, getOrders, toggleWishlist, getWishlist.
+- **Models:** `order.model.js` (orders, order_items, order_customizations, stock checks), cart in DB or session as per implementation, `wishlist.model.js`.
+
+**Behaviour:**
+- **Cart:** Add/update/remove by user_id and saree_id; quantity validated against stock; unique (user_id, saree_id) for cart line.
+- **Create order:** Validates cart items, checks stock, computes total (with optional offer application), creates `orders` and `order_items` (and `order_customizations` if present); deducts stock; clears cart entries for ordered items; can create notifications for weavers.
+- **Orders:** getOrders returns buyer’s orders with items and status for order-history page.
+- **Wishlist:** Toggle adds/removes (user_id, saree_id); getWishlist returns list of saved sarees for wishlist page.
+
+**Data flow:** Authenticated user → POST/GET /api/cart/*, /api/orders, /api/wishlist/* → BuyerController / WishlistController → Order/Wishlist/Cart models → MySQL → JSON.
+
+---
+
+#### Module 6: Weaver Module (Dashboard, Sarees, Stories, Orders, Sales)
+
+**Purpose:** To give weavers a single place to manage their catalogue, stories, orders, and view sales performance.
+
+**Components:**
+- **Routes:** `routes/weaver.routes.js` — all routes use `requireAuth` and `requireWeaverApproved`. Endpoints: dashboard, orders (list, update status), sarees (list, get, create, update, delete, delete image), stories (list, create, delete), sales-report.
+- **Controller:** `controllers/weaver.controller.js` — getDashboard, getOrders, updateOrderStatus, getMySarees, getSareeById, uploadSaree, updateSaree, deleteSaree, deleteSareeImage, getMyStories, uploadStory, deleteStory, getSalesReport.
+- **Middleware:** Upload middleware for saree images and story media (see Module 3).
+- **Models:** User, Saree, SareeImages, Variants, Orders/OrderItems, Approval (saree/story), and analytics queries.
+
+**Behaviour:**
+- **Dashboard:** Aggregates weaver’s saree count, order count, revenue, pending approvals; returns counts and recent activity for weaver-dashboard page.
+- **Sarees:** CRUD with multi-image upload (Multer array); new sarees create a pending approval record; update/delete apply only to own sarees; image delete removes file and DB row.
+- **Stories:** Create with media upload (images/videos), pending approval; list and delete own stories only.
+- **Orders:** List orders that contain at least one saree belonging to the weaver; update status (e.g. confirmed, shipped) for those orders.
+- **Sales report:** Top-selling sarees, revenue over time (e.g. by month), and other metrics for the logged-in weaver for weaver-sales-report page.
+
+**Data flow:** Weaver (approved) → GET/POST/PUT/DELETE /api/weaver/* → WeaverController → Saree/Order/Approval/Story models → DB; uploads go through Module 3.
+
+---
+
+#### Module 7: Admin Module (Dashboard, Users, Sarees, Orders, Categories, Approvals, Analytics, Reports)
+
+**Purpose:** To provide platform oversight: user management, content moderation, order monitoring, category management, and platform-wide analytics and reports.
+
+**Components:**
+- **Routes:** `routes/admin.routes.js` — all under `/api/admin`; middleware: `requireAuth`, `requireRole('admin')`. Endpoints: dashboard, users (list, approve, reject, suspend, reactivate, update), sarees (list, activate, deactivate, delete), orders (list, update status), categories (list, create, update), analytics, report, approvals (pending list, approve/reject saree/story, bulk approve sarees).
+- **Controller:** `controllers/admin.controller.js` — getDashboard, getUsers, approveWeaver, rejectWeaver, suspendUser, reactivateUser, updateUser, getSarees, deactivateSaree, activateSaree, deleteSaree, getOrders, updateOrderStatus, getCategories, createCategory, updateCategory, getAnalytics, getReport, getPendingApprovals, approveSaree, rejectSaree, approveStory, rejectStory, bulkApproveSarees.
+
+**Behaviour:**
+- **Dashboard:** Counts for users (buyer + weaver), weavers, buyers, sarees, orders, revenue, pending orders, pending weaver/saree/story approvals; returned as single payload for admin-dashboard page.
+- **Users:** List with filters (role, search); approve/reject weavers (sets `is_approved`, sends notification); suspend/reactivate (sets `is_suspended`); update user details.
+- **Sarees / Orders / Categories:** List and moderate (activate/deactivate/delete sarees); update order status; CRUD categories.
+- **Approvals:** Fetch pending sarees and stories; approve/reject with optional rejection reason and `admin_id`; bulk approve for sarees; on approval, set `is_approved` and notify weaver where applicable.
+- **Analytics:** getAnalytics — category-wise revenue/sales, top weavers (by sales/revenue), recent activity (e.g. recent orders); data for admin-analytics charts and tables.
+- **Report:** getReport — platform-wide summary (users, orders, revenue, etc.) for admin-report page.
+
+**Data flow:** Admin only → /api/admin/* → AdminController → User, Saree, Order, Approval, Offer, Notification models and raw SQL aggregates → JSON.
+
+---
+
+#### Module 8: Analytics & Reporting Processor
+
+**Purpose:** To compute metrics and aggregates for dashboards and reports (weaver and admin).
+
+**Components:**
+- **Admin:** `controllers/admin.controller.js` — getDashboard, getAnalytics, getReport; `models/order.model.js` (e.g. getPlatformStats), and direct SQL or model methods for category breakdown, top weavers, recent activity.
+- **Weaver:** `controllers/weaver.controller.js` — getDashboard, getSalesReport; order and saree models for weaver-scoped aggregates (sales by saree, revenue by period).
+
+**Behaviour:**
+- **Admin dashboard:** Total users, weavers, buyers, sarees, orders, revenue, pending counts (orders, weaver approvals, saree/story approvals).
+- **Admin analytics:** Revenue by category (e.g. from order_items joined to sarees and categories), top performing weavers (revenue/sales per weaver), recent activity (e.g. latest orders or registrations).
+- **Admin report:** Comprehensive platform stats (suitable for export or report page).
+- **Weaver dashboard:** Own saree count, order count, revenue, pending approvals.
+- **Weaver sales report:** Top-selling sarees, time-series revenue (e.g. monthly), used for charts/tables on weaver-sales-report page.
+
+**Data flow:** Request → Admin/Weaver controller → Order/Saree/User/Approval models and SQL (SUM, COUNT, GROUP BY) → JSON for front-end charts (e.g. Chart.js) and tables.
+
+---
+
+#### Module 9: Notification Module
+
+**Purpose:** To store and deliver in-app notifications (e.g. approval, order status) and expose unread count for the header badge.
+
+**Components:**
+- **Routes:** `GET /api/notifications/unread-count` (no auth; returns 0 for guests), `GET /api/notifications` (requireAuth), `PATCH /api/notifications/read-all`, `PATCH /api/notifications/:id/read`.
+- **Controller:** `controllers/notification.controller.js` — getUnreadCount, getNotifications, markAllRead, markAsRead.
+- **Model:** `models/notification.model.js` — create, getByUser, getUnreadCount, markAsRead, markAllRead.
+
+**Behaviour:**
+- **Unread count:** Always returns `200` with `{ count: n }`; 0 when not logged in or on error (safe for header).
+- **List:** Returns notifications for `req.session.userId` with limit; ordered by created_at.
+- **Mark read:** Single or all; updates `notifications.is_read` for the current user.
+- **Create:** Used by other modules (e.g. admin approve weaver/saree/story, order status change) via NotificationModel.create({ userId, message, type }).
+
+**Data flow:** Other modules call NotificationModel.create; client polls or loads unread count and list; PATCH updates read state.
+
+---
+
+#### Module 10: UI Component Engine (Front-End)
+
+**Purpose:** To provide a consistent, role-aware layout (header, sidebar, footer) and global behaviour (search, logout) across all pages.
+
+**Components:**
+- **Script:** `public/js/components.js` — loaded by pages that need header/sidebar/footer. Depends on `api.js` (e.g. `api.get('/api/auth/me')`) and optional `notifications` helper for unread count.
+- **Placeholders:** Pages include `<div id="header-placeholder">`, `<div id="sidebar-placeholder">`, `<div id="footer-placeholder">` and call `components.injectHeader()`, `components.injectSidebar()`, `components.injectFooter()` (or equivalent) on DOMContentLoaded.
+
+**Behaviour:**
+- **getCurrentUser:** Calls `GET /api/auth/me`; returns user object or null (guests); used to decide what to render.
+- **Header:** Logo links to admin-dashboard (admin) or buyer-home (others). Shows Stories link, global search input, and for logged-in users: cart link (non-admin), notification bell (with unread count), profile dropdown (name, role, My Profile, Weaver/Admin dashboard links, Logout). For guests: Login and Get Started buttons.
+- **Global search:** On input, debounced call to `GET /api/sarees/search?q=...&limit=5`; suggestions dropdown with thumbnails and “View all results”; Enter navigates to buyer-home with query.
+- **Sidebar:** Rendered only when user is logged in. **Buyer:** Home, Wishlist, Cart, Orders, Profile. **Weaver (approved):** Dashboard, My Sarees, Upload Saree, My Orders, Stories, Sales Report, Profile. **Weaver (pending):** Pending Approval, Browse Sarees, Profile. **Admin:** Dashboard, Approvals, Users, Sarees, Orders, Categories, Analytics, Reports. Icons from Notion-Icons or custom (e.g. heart). Active item highlighted by current path. Sidebar toggle: desktop = collapse/expand (arrow `>` / `<`, state in localStorage); mobile = overlay and backdrop.
+- **Footer:** Injected once; typically logo, mission, quick links, contact, social; same for all roles.
+- **Logout:** Header “Logout” calls auth.handleLogout (e.g. POST /api/auth/logout) then redirects to buyer-home.
+
+**Data flow:** Page load → components.injectHeader/Sidebar/Footer → GET /api/auth/me, GET /api/notifications/unread-count → DOM updated; user actions (search, logout) → API calls and navigation.
+
+---
+
+#### Supporting Modules (Brief)
+
+- **Offer module:** `routes/offer.routes.js`, `controllers/offer.controller.js`, `models/offer.model.js` — list active offers, apply at checkout (percentage, fixed, free_shipping, bogo); category-linked offers.
+- **Variant module:** `routes/variant.routes.js`, `controllers/variant.controller.js`, `models/variant.model.js` — get variants by saree for detail page and cart/order.
+- **Category module:** `controllers/category.controller.js` — GET /api/categories for public dropdown/filters.
+- **User profile module:** `routes/user.routes.js`, `controllers/user.controller.js` — get/update profile, avatar upload (uses uploadAvatar from Module 3).
+
+---
+
+Together, these modules implement the full Handloom Weavers Nexus flow: **guest browsing** (Module 4), **authentication and RBAC** (Modules 1–2), **buyer cart and orders** (Module 5), **weaver catalogue and stories** (Modules 3, 6), **admin moderation and analytics** (Modules 7–8), and **notifications and UI consistency** (Modules 9–10).
 
 ### 3.6 INPUT & OUTPUT DESIGN
 
