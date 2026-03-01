@@ -477,6 +477,23 @@
                 return;
             }
             await loadUsers();
+
+            // Handle query params for filters
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusParam = urlParams.get('filter');
+            if (statusParam === 'pending') {
+                const statusSelect = document.getElementById('status-filter');
+                if (statusSelect) {
+                    statusSelect.value = 'pending';
+                    filterUsers();
+                }
+            } else if (statusParam === 'weaver') {
+                const roleSelect = document.getElementById('role-filter');
+                if (roleSelect) {
+                    roleSelect.value = 'weaver';
+                    filterUsers();
+                }
+            }
         })();
     </script>
 </body>

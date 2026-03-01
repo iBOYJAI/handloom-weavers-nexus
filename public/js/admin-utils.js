@@ -1,7 +1,10 @@
 // Admin utility functions for search, filter, and bulk operations
 const adminUtils = {
     // Initialize search and filter
+    _isInitializing: false,
     initSearchFilter(containerId, data, renderFunction, options = {}) {
+        if (this._isInitializing) return;
+        this._isInitializing = true;
         const container = document.getElementById(containerId);
         if (!container) return;
 
@@ -31,6 +34,28 @@ const adminUtils = {
         container._originalData = data;
         container._renderFunction = renderFunction;
         container._options = options;
+
+        // Handle query params for filters
+        const urlParams = new URLSearchParams(window.location.search);
+        let hasParamFilter = false;
+
+        urlParams.forEach((val, key) => {
+            if (key === 'search' && searchInput) {
+                searchInput.value = val;
+                hasParamFilter = true;
+            } else {
+                const filterSelect = container.querySelector(`.admin-filter-select[data-filter="${key}"]`);
+                if (filterSelect) {
+                    filterSelect.value = val;
+                    hasParamFilter = true;
+                }
+            }
+        });
+
+        if (hasParamFilter) {
+            this.applyFilters(data, renderFunction, container, options);
+        }
+        this._isInitializing = false;
     },
 
     // Apply filters and search
@@ -38,7 +63,7 @@ const adminUtils = {
         const searchInput = container.querySelector('.admin-search-input');
         const filterSelects = container.querySelectorAll('.admin-filter-select');
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        
+
         let filtered = [...data];
 
         // Apply search
@@ -55,7 +80,7 @@ const adminUtils = {
         filterSelects.forEach(select => {
             const filterKey = select.dataset.filter;
             const filterValue = select.value;
-            
+
             if (filterValue && filterValue !== 'all') {
                 filtered = filtered.filter(item => {
                     const value = this.getNestedValue(item, filterKey);
@@ -117,7 +142,7 @@ const adminUtils = {
                 btn.addEventListener('click', async () => {
                     const action = btn.dataset.bulkAction;
                     const selectedIds = this.getSelectedIds(container);
-                    
+
                     if (selectedIds.length === 0) {
                         if (window.notifications) {
                             window.notifications.showToast('warning', 'No Selection', 'Please select items first');

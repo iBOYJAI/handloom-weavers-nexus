@@ -30,10 +30,35 @@
         .chart-container {
             background: white;
             border-radius: 24px;
-            padding: 2.5rem;
+            padding: 2rem;
             border: 1px solid #f0f0f0;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
-            min-height: 400px;
+            height: 450px;
+            /* Fixed height to prevent automatic expansion */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            /* Critical for Chart.js in flexbox */
+        }
+
+        .activity-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .activity-list-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .activity-list-scroll::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
         }
 
         .stats-tile {
@@ -108,22 +133,24 @@
 
                     <div class="analytics-grid">
                         <div class="chart-container">
-                            <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 2rem;">
+                            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 1rem;">
                                 Revenue by Category</h3>
-                            <canvas id="category-chart"></canvas>
+                            <div class="chart-wrapper">
+                                <canvas id="category-chart"></canvas>
+                            </div>
                         </div>
                         <div class="chart-container">
-                            <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 2rem;">Recent
+                            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 1rem;">Recent
                                 Activity</h3>
-                            <div id="recent-activity-list"></div>
+                            <div id="recent-activity-list" class="activity-list-scroll"></div>
                         </div>
                     </div>
 
                     <div style="margin-top: 3rem;">
                         <div class="chart-container">
-                            <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 2rem;">Top
+                            <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin-bottom: 1rem;">Top
                                 Performing Artisans</h3>
-                            <div style="overflow-x: auto;">
+                            <div style="overflow-x: auto; flex: 1;" class="activity-list-scroll">
                                 <table class="data-table" id="top-weavers-table">
                                     <thead>
                                         <tr>
@@ -162,69 +189,101 @@
                 const response = await api.get('/api/admin/analytics');
                 const data = response.data;
 
+                if (!data) {
+                    throw new Error('No analytics data received');
+                }
+
                 document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('analytics-content').style.display = 'block';
+                const content = document.getElementById('analytics-content');
+                content.style.display = 'block';
 
                 // Update Stats
-                const totalRevenue = data.categoryBreakdown.reduce((sum, item) => sum + parseFloat(item.revenue), 0);
-                const totalSarees = data.categoryBreakdown.reduce((sum, item) => sum + parseInt(item.saree_count), 0);
-                document.getElementById('stats-revenue').textContent = `₹${totalRevenue.toLocaleString()}`;
-                document.getElementById('stats-weavers').textContent = data.topWeavers.length;
-                document.getElementById('stats-sarees').textContent = totalSarees;
+                const stats = {
+                    revenue: (data.categoryBreakdown || []).reduce((sum, item) => sum + (parseFloat(item.revenue) || 0), 0),
+                    weavers: (data.topWeavers || []).length,
+                    sarees: (data.categoryBreakdown || []).reduce((sum, item) => sum + (parseInt(item.saree_count) || 0), 0)
+                };
+
+                document.getElementById('stats-revenue').textContent = `₹${stats.revenue.toLocaleString('en-IN')}`;
+                document.getElementById('stats-weavers').textContent = stats.weavers;
+                document.getElementById('stats-sarees').textContent = stats.sarees;
 
                 // Category Chart
-                const ctx = document.getElementById('category-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.categoryBreakdown.map(c => c.name),
-                        datasets: [{
-                            data: data.categoryBreakdown.map(c => c.revenue),
-                            backgroundColor: ['#C0392B', '#B8860B', '#2C3E50', '#7F8C8D', '#E67E22', '#16A085'],
-                            borderWidth: 0,
-                            hoverOffset: 20
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            legend: { position: 'bottom', labels: { padding: 25, usePointStyle: true, font: { family: 'Poppins', size: 12 } } }
+                const chartEl = document.getElementById('category-chart');
+                if (chartEl && data.categoryBreakdown && data.categoryBreakdown.length > 0) {
+                    const ctx = chartEl.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.categoryBreakdown.map(c => c.name),
+                            datasets: [{
+                                data: data.categoryBreakdown.map(c => c.revenue),
+                                backgroundColor: ['#8B4513', '#D4930A', '#2C3E50', '#7F8C8D', '#E67E22', '#16A085'],
+                                borderWidth: 0,
+                                hoverOffset: 20
+                            }]
                         },
-                        cutout: '70%',
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
+                        options: {
+                            plugins: {
+                                legend: { position: 'bottom', labels: { padding: 25, usePointStyle: true, font: { family: 'Poppins', size: 12 } } }
+                            },
+                            cutout: '70%',
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                } else if (chartEl) {
+                    chartEl.parentElement.innerHTML += '<p style="text-align:center;color:#999;padding:2rem;">No category data available</p>';
+                }
 
                 // Recent Activity
                 const activityList = document.getElementById('recent-activity-list');
-                activityList.innerHTML = (data.recentActivity || []).map(act => `
-                    <div class="activity-card">
-                        <div>
-                            <div style="font-weight: 700; color: var(--color-dark);">#${act.id} by ${act.buyer_name}</div>
-                            <div style="font-size: 0.85rem; color: #999;">${new Date(act.created_at).toLocaleDateString()}</div>
+                const activities = data.recentActivity || [];
+                if (activities.length > 0) {
+                    activityList.innerHTML = activities.map(act => `
+                        <div class="activity-card">
+                            <div>
+                                <div style="font-weight: 700; color: var(--color-dark);">Order #${act.id}</div>
+                                <div style="font-size: 0.85rem; color: #999;">${new Date(act.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 800; color: var(--color-primary);">₹${parseFloat(act.total_amount || 0).toLocaleString('en-IN')}</div>
+                                <span class="status-badge status-${act.status || 'pending'}">${act.status || 'pending'}</span>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: 800; color: var(--color-primary);">₹${parseFloat(act.total_amount).toLocaleString()}</div>
-                            <span class="status-badge status-${act.status}">${act.status}</span>
-                        </div>
-                    </div>
-                `).join('') || '<p style="color: #999; text-align: center; padding: 2rem;">No recent orders</p>';
+                    `).join('');
+                } else {
+                    activityList.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No recent orders</p>';
+                }
 
                 // Top Weavers
                 const weaversBody = document.getElementById('top-weavers-body');
-                weaversBody.innerHTML = (data.topWeavers || []).slice(0, 5).map(w => `
-                    <tr>
-                        <td style="font-weight: 700;">${w.name}</td>
-                        <td>${w.region || 'Unknown'}</td>
-                        <td>${w.order_count} Orders</td>
-                        <td style="font-weight: 800; color: var(--color-primary);">₹${parseFloat(w.total_earnings).toLocaleString()}</td>
-                        <td><button class="btn btn-secondary btn-sm" onclick="window.location.href='/pages/admin-users.html?id=${w.id}'">View Detail</button></td>
-                    </tr>
-                `).join('');
+                const weavers = data.topWeavers || [];
+                if (weavers.length > 0) {
+                    weaversBody.innerHTML = weavers.slice(0, 5).map(w => `
+                        <tr>
+                            <td style="font-weight: 700;">${w.name}</td>
+                            <td>${w.region || 'Unknown'}</td>
+                            <td>${w.order_count} Orders</td>
+                            <td style="font-weight: 800; color: var(--color-primary);">₹${parseFloat(w.total_earnings || 0).toLocaleString('en-IN')}</td>
+                            <td><button class="btn btn-secondary btn-sm" onclick="window.location.href='/pages/admin-users.html?id=${w.id}'">View Detail</button></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    weaversBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#999;">No weaver data available</td></tr>';
+                }
 
             } catch (err) {
+                console.error('Analytics load error:', err);
+                document.getElementById('loading-state').innerHTML = `
+                    <div style="color: var(--color-light-red); padding: 2rem;">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-bottom:1rem;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <h3 style="margin-bottom:0.5rem;">Marketplace Intelligence Offline</h3>
+                        <p style="color:#666;">${err.message || 'Unable to retrieve data at this time.'}</p>
+                        <button class="btn btn-primary" style="margin-top:1.5rem;" onclick="location.reload()">Try Again</button>
+                    </div>
+                `;
                 notifications.showToast('error', 'Sync Failed', 'Unable to retrieve marketplace intelligence.');
-                console.error(err);
             }
         })();
     </script>

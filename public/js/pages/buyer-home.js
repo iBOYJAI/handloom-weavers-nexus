@@ -57,9 +57,22 @@
         const addBtn = user
             ? `<button class="btn btn-primary product-card-sm-btn" onclick="window.buyerHomeAddToCart(${saree.id},event)">Add Cart</button>`
             : `<a href="/pages/login.html" class="btn btn-secondary product-card-sm-btn">Login</a>`;
+
+        const isInWishlist = user && typeof wishlistUtils !== 'undefined' ? wishlistUtils.isInWishlist(saree.id) : false;
+        const wishlistBtn = user ? `
+            <button class="wishlist-toggle-sm ${isInWishlist ? 'in-wishlist' : ''}" 
+                    onclick="window.buyerHomeToggleWishlist(${saree.id}, event)"
+                    style="position: absolute; top: 0.75rem; right: 0.75rem; background: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 5; transition: all 0.2s;">
+                <svg class="heart-icon ${isInWishlist ? 'active' : ''}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </button>
+        ` : '';
+
         return `
         <div class="product-card-sm" onclick="window.location.href='/pages/saree-detail.html?id=${saree.id}'">
             ${badge ? `<span class="product-card-sm-badge">${badge}</span>` : ''}
+            ${wishlistBtn}
             <img class="product-card-sm-img" src="${img}" alt="${(saree.title || '').replace(/"/g, '&quot;')}" onerror="this.src='${LOCAL_IMGS[0]}'">
             <div class="product-card-sm-body">
                 <div class="product-card-sm-cat">${(saree.category_name || 'Saree').replace(/</g, '&lt;')}</div>
@@ -68,9 +81,9 @@
             </div>
             <div class="product-card-sm-footer">
                 ${showOffer
-                    ? `<span style="text-decoration:line-through;opacity:0.6;margin-right:0.35rem;">₹${Number(originalPrice).toLocaleString('en-IN')}</span><span class="product-card-sm-price">₹${Number(price).toLocaleString('en-IN')}</span>`
-                    : `<span class="product-card-sm-price">₹${Number(price).toLocaleString('en-IN')}</span>`
-                }
+                ? `<span style="text-decoration:line-through;opacity:0.6;margin-right:0.35rem;">₹${Number(originalPrice).toLocaleString('en-IN')}</span><span class="product-card-sm-price">₹${Number(price).toLocaleString('en-IN')}</span>`
+                : `<span class="product-card-sm-price">₹${Number(price).toLocaleString('en-IN')}</span>`
+            }
                 ${addBtn}
             </div>
         </div>`;
@@ -107,6 +120,11 @@
                 : '<a href="/pages/register.html" class="btn btn-primary" style="border-radius:var(--radius-full);padding:0.75rem 2rem;">Start Shopping</a><a href="/pages/login.html" class="btn btn-secondary" style="border-radius:var(--radius-full);padding:0.75rem 2rem;">Login</a>';
         }
         if (heroSub) heroSub.textContent = user ? 'Welcome back! Discover exquisite handloom sarees.' : 'Our sarees are a reflection of your elegance. Premium handloom directly from artisan weavers across India.';
+
+        // Load user wishlist if logged in (now handled by wishlistUtils.init() in wishlist-utils.js)
+        if (user && typeof wishlistUtils !== 'undefined') {
+            await wishlistUtils.init();
+        }
     }
 
     async function loadOffers() {
@@ -303,6 +321,21 @@
             if (typeof notifications !== 'undefined') notifications.showToast('success', 'Added!', 'Item added to cart');
         } catch (e) {
             if (typeof notifications !== 'undefined') notifications.showToast('error', 'Error', e.message || 'Failed to add');
+        }
+    };
+
+    window.buyerHomeToggleWishlist = async function (sareeId, evt) {
+        if (evt) evt.stopPropagation();
+        if (!user) {
+            window.location.href = '/pages/login.html';
+            return;
+        }
+
+        const btn = evt.currentTarget;
+        const icon = btn.querySelector('.heart-icon');
+
+        if (typeof wishlistUtils !== 'undefined') {
+            await wishlistUtils.toggle(sareeId, btn, icon);
         }
     };
 

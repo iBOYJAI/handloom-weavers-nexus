@@ -589,3 +589,74 @@
 .footer form button {
     white-space: nowrap;
 }
+
+/* Wishlist Icons & Animations */
+.heart-icon {
+    color: #000000;
+    /* Explicit black as requested */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.heart-icon.active {
+    fill: var(--color-primary) !important;
+    stroke: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+    animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.wishlist-toggle-sm:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wishlist-toggle-sm:active {
+    transform: scale(0.95);
+}
+
+#wishlist-toggle-btn.in-wishlist {
+    border-color: var(--color-primary) !important;
+}
+
+.wishlist-btn {
+    background: white;
+    border: 1.5px solid var(--color-border);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+}
+
+.wishlist-btn:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+
+/* Final Override for Wishlist Color */
+.heart-icon.active,
+.in-wishlist .heart-icon,
+.wishlist-btn.in-wishlist .heart-icon {
+    fill: var(--color-primary) !important;
+    stroke: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+    animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}

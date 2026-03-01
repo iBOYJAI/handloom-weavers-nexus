@@ -68,6 +68,14 @@
             color: white;
             transform: scale(1.1);
         }
+
+        /* Use standardized heart icon from components.css */
+
+        .wishlist-card.removing {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -109,6 +117,7 @@
     <script src="/js/auth.js"></script>
     <script src="/js/notifications.js"></script>
     <script src="/js/components.js"></script>
+    <script src="/js/wishlist-utils.js"></script>
     <script>
         async function loadWishlist() {
             const container = document.getElementById('wishlist-container');
@@ -136,12 +145,16 @@
 
                 container.innerHTML = `
                     <div class="wishlist-grid">
-                        ${wishlist.map(item => `
-                            <div class="wishlist-card">
-                                <button class="remove-wish-btn" onclick="removeFromWishlist(${item.saree_id})" title="Remove from wishlist">
-                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+                        ${wishlist.map(item => {
+                    const imgPath = item.primary_image || '/assets/images/defaults/saree-placeholder.svg';
+                    return `
+                            <div class="wishlist-card" id="wish-card-${item.saree_id}">
+                                <button class="remove-wish-btn in-wishlist" onclick="removeFromWishlist(${item.saree_id}, this)" title="Remove from wishlist">
+                                    <svg class="heart-icon active" width="22" height="22" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
                                 </button>
-                                <img src="/${item.primary_image || 'assets/images/defaults/saree-placeholder.svg'}" 
+                                <img src="${imgPath}" 
                                      class="wishlist-img" 
                                      onclick="window.location.href='/pages/saree-detail.html?id=${item.saree_id}'"
                                      onerror="this.src='/assets/images/defaults/saree-placeholder.svg'">
@@ -153,7 +166,8 @@
                                     </div>
                                 </div>
                             </div>
-                        `).join('')}
+                        `;
+                }).join('')}
                     </div>
                 `;
 
@@ -162,12 +176,24 @@
             }
         }
 
-        async function removeFromWishlist(sareeId) {
+        async function removeFromWishlist(sareeId, btn) {
             try {
-                await api.delete(`/api/wishlist/${sareeId}`);
-                notifications.showToast('success', 'Removed', 'Item removed from your favorites.');
-                loadWishlist();
+                const card = document.getElementById(`wish-card-${sareeId}`);
+                const icon = btn.querySelector('svg');
+
+                if (typeof wishlistUtils !== 'undefined') {
+                    if (card) card.classList.add('removing');
+                    await wishlistUtils.toggle(sareeId, btn, icon);
+                    setTimeout(() => loadWishlist(), 400);
+                } else {
+                    // Fallback
+                    await api.post('/api/wishlist/toggle', { sareeId: sareeId });
+                    notifications.showToast('success', 'Removed', 'Removed from wishlist');
+                    setTimeout(() => loadWishlist(), 400);
+                }
             } catch (error) {
+                const card = document.getElementById(`wish-card-${sareeId}`);
+                if (card) card.classList.remove('removing');
                 notifications.showToast('error', 'Error', 'Failed to remove item.');
             }
         }

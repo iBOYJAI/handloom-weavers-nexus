@@ -308,6 +308,14 @@
         });
     });
 
+    // Handle query params for tabs
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'stories') {
+        const storiesTabBtn = document.querySelector('.tab-premium[data-tab="stories"]');
+        if (storiesTabBtn) storiesTabBtn.click();
+    }
+
     // Initialize
     await loadPendingApprovals();
 })();

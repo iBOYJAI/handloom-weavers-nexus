@@ -20,7 +20,19 @@ const WishlistController = {
                 [userId]
             );
 
-            res.json({ success: true, data: items });
+            const normalizedItems = items.map(item => {
+                if (item.primary_image) {
+                    item.primary_image = item.primary_image.replace(/\\/g, '/');
+                    // Strip 'public/' if present as it's the static root
+                    item.primary_image = item.primary_image.replace(/^public\//, '');
+                    if (!item.primary_image.startsWith('/')) {
+                        item.primary_image = '/' + item.primary_image;
+                    }
+                }
+                return item;
+            });
+
+            res.json({ success: true, data: normalizedItems });
         } catch (error) {
             console.error('Get wishlist error:', error);
             res.status(500).json({ success: false, message: 'Failed to fetch wishlist' });

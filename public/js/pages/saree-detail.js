@@ -12,6 +12,7 @@
 
     let saree = null;
     let selectedVariant = null;
+    let isInWishlist = false;
 
     // Load saree details
     async function loadSareeDetail() {
@@ -63,8 +64,10 @@
                 <div class="saree-detail-info">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <h1 class="saree-detail-title">${saree.title}</h1>
-                        <button class="wishlist-btn" onclick="toggleWishlist(${saree.id})" style="background: white; border: 1.5px solid var(--color-border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--transition-fast);">
-                            <img src="${components.getIconUrl('heart')}" alt="Wishlist" style="width: 22px; height: 22px;">
+                        <button class="wishlist-btn" id="wishlist-toggle-btn" onclick="toggleWishlist(${saree.id})">
+                            <svg class="heart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
                         </button>
                     </div>
                     
@@ -178,6 +181,26 @@
 
         // Initialize customization form
         initializeCustomizationForm();
+
+        // Initial wishlist check
+        checkInitialWishlist();
+    }
+
+    // Check if saree is initially in wishlist
+    async function checkInitialWishlist() {
+        if (!user) return;
+        try {
+            const response = await api.get(`/api/wishlist/check/${sareeId}`);
+            if (response.inWishlist) {
+                isInWishlist = true;
+                const btn = document.getElementById('wishlist-toggle-btn');
+                const icon = btn.querySelector('.heart-icon');
+                btn.classList.add('in-wishlist');
+                icon.classList.add('active');
+            }
+        } catch (error) {
+            console.error('Check wishlist error:', error);
+        }
     }
 
     // Initialize variant selection
@@ -343,11 +366,54 @@
             window.location.href = '/pages/login.html';
             return;
         }
+
+        const btn = document.getElementById('wishlist-toggle-btn');
+        const icon = btn.querySelector('.heart-icon');
+        const sid = sareeId || saree.id;
+
+        // Force sync with DOM state to prevent being stuck in one state
+        const domHasClass = btn.classList.contains('in-wishlist');
+        if (isInWishlist !== domHasClass) {
+            isInWishlist = domHasClass;
+        }
+
+        // Optimistic UI update
+        isInWishlist = !isInWishlist;
+        const isAdding = isInWishlist;
+
+        if (isAdding) {
+            btn.classList.add('in-wishlist');
+            icon.classList.add('active');
+        } else {
+            btn.classList.remove('in-wishlist');
+            icon.classList.remove('active');
+        }
+
         try {
-            const id = sareeId || saree.id;
-            const response = await api.post('/api/wishlist/toggle', { sareeId: id });
-            notifications.showToast('success', 'Success', response.message || 'Wishlist updated');
+            const response = await api.post('/api/wishlist/toggle', { sareeId: sid });
+            // The API returns the new state in 'inWishlist' property
+            // If it returns a state that differs from our optimistic one, sync it
+            if (response.hasOwnProperty('inWishlist') && response.inWishlist !== isInWishlist) {
+                isInWishlist = response.inWishlist;
+                if (isInWishlist) {
+                    btn.classList.add('in-wishlist');
+                    icon.classList.add('active');
+                } else {
+                    btn.classList.remove('in-wishlist');
+                    icon.classList.remove('active');
+                }
+            }
+            notifications.showToast('success', isAdding ? 'Added!' : 'Removed', response.message || (isAdding ? 'Added to wishlist' : 'Removed from wishlist'));
         } catch (error) {
+            // Revert on error
+            isInWishlist = !isAdding;
+            if (isInWishlist) {
+                btn.classList.add('in-wishlist');
+                icon.classList.add('active');
+            } else {
+                btn.classList.remove('in-wishlist');
+                icon.classList.remove('active');
+            }
             notifications.showToast('error', 'Error', error.message || 'Failed to update wishlist');
         }
     };

@@ -112,7 +112,7 @@ const SareeModel = {
 
             return rows.map(row => {
                 if (row.primary_image) {
-                    row.primary_image = row.primary_image.replace(/\\/g, '/');
+                    row.primary_image = row.primary_image.replace(/\\/g, '/').replace(/^public\//, '');
                     if (!row.primary_image.startsWith('http')) {
                         row.primary_image = '/' + row.primary_image.replace(/^\/+/, '');
                     }
@@ -169,7 +169,7 @@ const SareeModel = {
 
             return rows.map(row => {
                 if (row.primary_image) {
-                    row.primary_image = row.primary_image.replace(/\\/g, '/');
+                    row.primary_image = row.primary_image.replace(/\\/g, '/').replace(/^public\//, '');
                     if (!row.primary_image.startsWith('http')) {
                         row.primary_image = '/' + row.primary_image.replace(/^\/+/, '');
                     }
@@ -231,7 +231,7 @@ const SareeModel = {
         );
         return rows.map(row => {
             if (row.primary_image) {
-                row.primary_image = row.primary_image.replace(/\\/g, '/');
+                row.primary_image = row.primary_image.replace(/\\/g, '/').replace(/^public\//, '');
                 if (!row.primary_image.startsWith('http')) {
                     row.primary_image = '/' + row.primary_image.replace(/^\/+/, '');
                 }
@@ -260,7 +260,7 @@ const SareeModel = {
         const [rows] = await pool.query(query, [categoryId]);
         return rows.map(row => {
             if (row.primary_image) {
-                row.primary_image = row.primary_image.replace(/\\/g, '/');
+                row.primary_image = row.primary_image.replace(/\\/g, '/').replace(/^public\//, '');
                 if (!row.primary_image.startsWith('http')) {
                     row.primary_image = '/' + row.primary_image.replace(/^\/+/, '');
                 }
@@ -277,7 +277,7 @@ const SareeModel = {
         );
         return rows.map(row => {
             if (row.file_path) {
-                row.file_path = row.file_path.replace(/\\/g, '/');
+                row.file_path = row.file_path.replace(/\\/g, '/').replace(/^public\//, '');
                 if (!row.file_path.startsWith('/') && !row.file_path.startsWith('http')) {
                     row.file_path = '/' + row.file_path;
                 }
